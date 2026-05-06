@@ -1,0 +1,56 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import { sanityClient } from '../../lib/sanity.js'
+
+const notes = await sanityClient.fetch(`
+  *[_type == "note"] | order(publishedAt desc) {
+    _id,
+    title,
+    "slug": slug.current,
+    publishedAt,
+    excerpt
+  }
+`)
+
+const formatDate = (iso) => {
+  const d = new Date(iso)
+  return d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+}
+---
+
+<BaseLayout title="Notes — Autumn Z Art" description="Short pieces from the studio. Lessons, stories, and what I'm thinking about between the pieces.">
+
+  <section class="max-w-3xl mx-auto px-6 pt-24 md:pt-32 pb-16">
+    <p class="eyebrow mb-4">From the studio</p>
+    <h1 class="font-serif text-5xl md:text-7xl text-stone-900 leading-none tracking-tight mb-8">Notes.</h1>
+    <p class="body-prose max-w-xl">
+      Short pieces between the pieces. Lessons learned the hard way, stories from festivals, and what I'm thinking about when I'm not actively chalking, painting, or drawing.
+    </p>
+  </section>
+
+  <section class="max-w-3xl mx-auto px-6 pb-24 md:pb-32">
+    {notes.length === 0 ? (
+      <p class="text-stone-500 italic py-12">No notes yet. Check back soon.</p>
+    ) : (
+      <ul class="divide-y divide-stone-200 border-t border-stone-200 list-none p-0 m-0">
+        {notes.map((note) => (
+          <li>
+            <a href={`/notes/${note.slug}`} class="block py-8 group no-underline">
+              <p class="text-xs uppercase tracking-widest text-stone-400 mb-3">{formatDate(note.publishedAt)}</p>
+              <h2 class="font-serif text-2xl md:text-3xl text-stone-900 mb-3 group-hover:text-gold-700 transition">
+                {note.title}
+              </h2>
+              <p class="text-stone-600 leading-relaxed">
+                {note.excerpt}
+              </p>
+              <p class="mt-4 text-sm text-gold-700 font-medium">
+                Read the note →
+              </p>
+            </a>
+          </li>
+        ))}
+      </ul>
+    )}
+  </section>
+
+</BaseLayout>

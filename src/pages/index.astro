@@ -1,0 +1,581 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+import FinalCTA from '../components/FinalCTA.astro'
+import OnTourSection from '../components/ontoursection.astro'
+import { sanityClient } from '../lib/sanity.js'
+
+const todayISO = new Date().toISOString().split('T')[0]
+
+const upcomingEvents = await sanityClient.fetch(
+  `*[_type == "event" && featuredOnHomepage == true && (
+    (defined(endDate) && endDate >= $today) ||
+    (!defined(endDate) && startDate >= $today)
+  )] | order(startDate asc) [0...6] {
+    _id,
+    title,
+    startDate,
+    endDate,
+    location,
+    eventType,
+    url
+  }`,
+  { today: todayISO }
+)
+
+const eventsForDisplay = upcomingEvents.map((e) => {
+  const start = new Date(e.startDate)
+  const end = e.endDate ? new Date(e.endDate) : null
+  const monthShort = start.toLocaleDateString('en-US', { month: 'short' })
+  const startDay = start.getDate()
+  const endDay = end ? end.getDate() : null
+  const dateLabel = endDay && endDay !== startDay
+    ? `${monthShort} ${startDay}–${endDay}`
+    : `${monthShort} ${startDay}`
+  return {
+    id: e._id,
+    title: e.title,
+    location: e.location,
+    startDate: e.startDate,
+    dateLabel: dateLabel,
+    url: e.url,
+  }
+})
+
+// Pull the 3 most recent notes flagged as featured on the homepage
+const recentNotes = await sanityClient.fetch(`
+  *[_type == "note" && featuredOnHomepage == true] | order(publishedAt desc) [0...3] {
+    _id,
+    title,
+    "slug": slug.current,
+    publishedAt,
+    excerpt
+  }
+`)
+
+const formatNoteDate = (iso) => {
+  const d = new Date(iso)
+  return d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+}
+---
+
+<BaseLayout title="Autumn Z Art — Iowa Chalk, Mural & Pet Portrait Artist">
+
+  <!-- ===========================================
+       VIDEO HERO
+       =========================================== -->
+  <section class="relative w-full overflow-hidden bg-stone-900">
+    <video
+      autoplay
+      muted
+      loop
+      playsinline
+      preload="metadata"
+      poster="/images/maplegrove.jpg"
+      class="w-full h-full object-cover absolute inset-0 opacity-90"
+      aria-hidden="true"
+    >
+      <source src="/images/maplegrove_new.mp4" type="video/mp4" />
+    </video>
+
+    <div class="absolute inset-0 bg-gradient-to-r from-stone-900/70 via-stone-900/30 to-stone-900/10"></div>
+    <div class="absolute inset-0 bg-gradient-to-t from-stone-900/60 via-transparent to-transparent"></div>
+
+    <div class="relative max-w-6xl mx-auto px-6 py-32 md:py-48 min-h-[80vh] flex flex-col justify-end">
+      <h1 class="h1-display text-stone-50 mb-6 md:mb-8">
+        Iowa Chalk, Mural<br/>
+        & Pet Portrait Artist.
+      </h1>
+      <p class="hero-lede text-stone-200 mb-8 md:mb-10">
+        Currently booking festivals, windows, and pet portraits for 2026 & 2027.
+      </p>
+            <div class="flex flex-wrap gap-3 items-center">
+        <button type="button" data-inquire="commissions" class="inline-block px-6 py-3 bg-stone-50 text-stone-900 rounded-md text-sm font-medium hover:bg-stone-200 transition">
+          Start a commission
+        </button>
+        <a href="/work" class="inline-block px-2 py-3 text-stone-50 text-sm font-medium hover:text-gold-300 transition underline underline-offset-4">
+          See the work →
+        </a>
+      </div>
+
+    <div class="absolute bottom-4 right-6 md:bottom-6 md:right-8 z-10">
+      <p class="text-xs uppercase tracking-widest text-stone-300/80">Maple Grove · 2025</p>
+    </div>
+  </section>
+
+  <!-- ===========================================
+       PICK YOUR SURFACE — asymmetric layout
+       =========================================== -->
+  <section class="bg-gold-50 py-24 md:py-32">
+    <div class="max-w-5xl mx-auto px-6">
+
+      <div class="text-center mb-14 md:mb-20 max-w-2xl mx-auto">
+        <p class="eyebrow mb-4">Services</p>
+        <h2 class="h2-section mb-6">
+          What surface are you<br/>
+          trying to fill?
+        </h2>
+        <p class="body-prose text-stone-600">
+          Pick one! I'll send you right over!
+        </p>
+      </div>
+
+      <div class="surface-asymmetric">
+
+        <!-- Featured: Chalk -->
+        <a href="/services#chalk" class="surface-card surface-card-featured">
+          <svg class="surface-icon-lg" viewBox="0 0 64 64" width="80" height="80" fill="none" stroke="#78716c" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">
+            <line x1="8" y1="20" x2="56" y2="20" />
+            <line x1="8" y1="32" x2="56" y2="32" />
+            <line x1="8" y1="44" x2="56" y2="44" />
+            <circle cx="20" cy="32" r="2.5" fill="#78716c" stroke="none" opacity="0.6" />
+            <circle cx="38" cy="20" r="1.5" fill="#78716c" stroke="none" opacity="0.4" />
+            <circle cx="48" cy="44" r="2" fill="#78716c" stroke="none" opacity="0.5" />
+          </svg>
+          <p class="surface-label-lg">Pavement</p>
+          <p class="surface-tag">Chalk</p>
+        </a>
+
+        <!-- Glass -->
+        <a href="/services#windows" class="surface-card">
+          <svg class="surface-icon" viewBox="0 0 64 64" width="40" height="40" fill="none" stroke="#78716c" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+            <rect x="12" y="10" width="40" height="44" rx="2" />
+            <line x1="32" y1="10" x2="32" y2="54" />
+            <line x1="12" y1="32" x2="52" y2="32" />
+            <line x1="18" y1="16" x2="22" y2="20" opacity="0.5" />
+            <line x1="18" y1="20" x2="22" y2="24" opacity="0.5" />
+          </svg>
+          <p class="surface-label">Glass</p>
+          <p class="surface-tag">Windows</p>
+        </a>
+
+        <!-- Canvas -->
+        <a href="/services#portraits" class="surface-card">
+          <svg class="surface-icon" viewBox="0 0 64 64" width="40" height="40" fill="none" stroke="#78716c" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+            <rect x="14" y="10" width="36" height="40" rx="1" />
+            <line x1="32" y1="50" x2="32" y2="58" />
+            <line x1="24" y1="58" x2="40" y2="58" />
+            <path d="M 22 28 Q 28 22, 34 28 T 46 30" opacity="0.5" />
+          </svg>
+          <p class="surface-label">Canvas</p>
+          <p class="surface-tag">Pet portraits</p>
+        </a>
+
+        <!-- Wall -->
+        <a href="/services#murals" class="surface-card">
+          <svg class="surface-icon" viewBox="0 0 64 64" width="40" height="40" fill="none" stroke="#78716c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="8" y="12" width="48" height="40" rx="1" />
+            <line x1="8" y1="25" x2="56" y2="25" />
+            <line x1="8" y1="39" x2="56" y2="39" />
+            <line x1="24" y1="12" x2="24" y2="25" />
+            <line x1="40" y1="12" x2="40" y2="25" />
+            <line x1="16" y1="25" x2="16" y2="39" />
+            <line x1="32" y1="25" x2="32" y2="39" />
+            <line x1="48" y1="25" x2="48" y2="39" />
+            <line x1="24" y1="39" x2="24" y2="52" />
+            <line x1="40" y1="39" x2="40" y2="52" />
+          </svg>
+          <p class="surface-label">A wall</p>
+          <p class="surface-tag">Murals</p>
+        </a>
+
+        <!-- Custom -->
+        <a href="/services#commissions" class="surface-card">
+          <svg class="surface-icon" viewBox="0 0 64 64" width="40" height="40" fill="none" stroke="#78716c" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+            <rect x="10" y="10" width="44" height="44" rx="3" stroke-dasharray="4 4" />
+            <path d="M 26 26 Q 26 20, 32 20 T 38 26 Q 38 30, 32 32 L 32 38" />
+            <circle cx="32" cy="44" r="1.5" fill="#78716c" stroke="none" />
+          </svg>
+          <p class="surface-label">Something else</p>
+          <p class="surface-tag">Custom</p>
+        </a>
+
+      </div>
+
+      <p class="text-center mt-14 md:mt-16 text-sm text-stone-600">
+        Or just <a href="/services" class="text-gold-700 underline underline-offset-4 hover:text-gold-900">browse all services →</a>
+      </p>
+
+    </div>
+  </section>
+
+  <!-- ===========================================
+       UPCOMING EVENTS — On Tour section
+       =========================================== -->
+  {eventsForDisplay.length > 0 && (
+    <OnTourSection events={eventsForDisplay} />
+  )}
+
+  <!-- ===========================================
+       CHALK, THEN A TARP — five-frame story of one
+       piece and the rain that hit mid-chalk.
+       =========================================== -->
+  <section class="reveal bg-gold-50 border-y border-stone-200">
+    <div class="max-w-7xl mx-auto px-6 pt-24 md:pt-32 pb-32 md:pb-48">
+
+      <div class="max-w-2xl mb-14 md:mb-20">
+        <p class="eyebrow mb-4">One weekend</p>
+        <h2 class="h2-section mb-6">
+          You make it<br/>
+          anyways.
+        </h2>
+        <p class="body-prose max-w-md">
+          Outdoor festivals mean weather. Sometimes you finish in the sun. Sometimes the rain hits halfway through and you throw a tarp over twenty hours of work.
+        </p>
+      </div>
+
+      <div class="madegone-strip">
+        <figure class="madegone-frame">
+          <div class="madegone-img">
+            <img src="/images/maplegrove-start.JPEG" alt="The piece in progress, early hours" loading="lazy" />
+          </div>
+          <figcaption>
+            <span class="madegone-num">01</span>
+            <span class="madegone-label">Started</span>
+          </figcaption>
+        </figure>
+
+        <figure class="madegone-frame">
+          <div class="madegone-img">
+            <img src="/images/maplegrove-beforerain.JPEG" alt="The piece partway done, before the rain came" loading="lazy" />
+          </div>
+          <figcaption>
+            <span class="madegone-num">02</span>
+            <span class="madegone-label">Halfway</span>
+          </figcaption>
+        </figure>
+
+        <figure class="madegone-frame">
+          <div class="madegone-img">
+            <img src="/images/maplegrove-rain.JPEG" alt="Rain falls, tarp goes over the unfinished piece" loading="lazy" />
+          </div>
+          <figcaption>
+            <span class="madegone-num">03</span>
+            <span class="madegone-label">Rain</span>
+          </figcaption>
+        </figure>
+
+        <figure class="madegone-frame">
+          <div class="madegone-img">
+            <img src="/images/maplegrove-afterrain.JPEG" alt="After the rain, what survived under the tarp" loading="lazy" />
+          </div>
+          <figcaption>
+            <span class="madegone-num">04</span>
+            <span class="madegone-label">After</span>
+          </figcaption>
+        </figure>
+
+        <figure class="madegone-frame">
+          <div class="madegone-img">
+            <img src="/images/maplegrove-finished.JPEG" alt="The finished piece" loading="lazy" />
+          </div>
+          <figcaption>
+            <span class="madegone-num">05</span>
+            <span class="madegone-label">Finished</span>
+          </figcaption>
+        </figure>
+      </div>
+
+      <figure class="madegone-coda mt-16 md:mt-20 text-center">
+        <blockquote>
+          <p><em>"Each work grows, stays, decays."</em></p>
+        </blockquote>
+        <figcaption>— Andy Goldsworthy</figcaption>
+      </figure>
+
+    </div>
+  </section>
+
+  <!-- ===========================================
+       FROM THE STUDIO — recent notes teaser.
+       Only renders when there's at least one
+       featured note in Sanity.
+       =========================================== -->
+  {recentNotes.length > 0 && (
+    <section class="max-w-5xl mx-auto px-6 py-24 md:py-32">
+
+      <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-14 md:mb-20">
+        <div>
+          <p class="eyebrow mb-4">From the studio</p>
+          <h2 class="h2-section max-w-xl">Notes between<br/>the pieces.</h2>
+        </div>
+        <a href="/notes" class="text-sm text-gold-700 hover:text-gold-900 underline underline-offset-4 font-medium whitespace-nowrap self-start md:self-end">
+          Read all notes →
+        </a>
+      </div>
+
+      <div class="notes-grid">
+        {recentNotes.map((note) => (
+          <a href={`/notes/${note.slug}`} class="note-card">
+            <p class="note-date">{formatNoteDate(note.publishedAt)}</p>
+            <h3 class="note-title">{note.title}</h3>
+            <p class="note-tease">{note.excerpt}</p>
+            <p class="note-cta">Read the note →</p>
+          </a>
+        ))}
+      </div>
+
+    </section>
+  )}
+
+  <FinalCTA
+    heading="Have an idea? I'd love to hear about it."
+    subheading="Commissions open for 2026 & 2027."
+    buttonLabel="Start the conversation"
+    inquireKey="commissions"
+  />
+
+</BaseLayout>
+
+<style>
+  details > summary::-webkit-details-marker { display: none; }
+
+  .surface-asymmetric {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  @media (min-width: 768px) {
+    .surface-asymmetric {
+      grid-template-columns: 1.4fr 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 14px;
+    }
+  }
+
+  .surface-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 22px 16px;
+    background: #fefdf9;
+    border: 1px solid rgb(231 229 228);
+    border-radius: 8px;
+    text-decoration: none;
+    text-align: center;
+    transition: transform 350ms cubic-bezier(0.22, 1, 0.36, 1), border-color 250ms, box-shadow 350ms, background-color 250ms;
+    cursor: pointer;
+    min-height: 140px;
+  }
+
+  .surface-card:hover {
+    transform: translateY(-4px);
+    border-color: rgb(202 138 4);
+    background: #ffffff;
+    box-shadow: 0 1px 2px rgba(28,25,23,0.04), 0 16px 32px -12px rgba(202, 138, 4, 0.18);
+  }
+
+  .surface-card-featured {
+    padding: 36px 28px;
+    gap: 18px;
+    min-height: 280px;
+  }
+
+  @media (min-width: 768px) {
+    .surface-card-featured {
+      grid-row: 1 / 3;
+      min-height: auto;
+    }
+  }
+
+  .surface-icon { margin-bottom: 12px; flex-shrink: 0; }
+  .surface-icon-lg { flex-shrink: 0; }
+
+  .surface-card:hover .surface-icon line,
+  .surface-card:hover .surface-icon rect,
+  .surface-card:hover .surface-icon path,
+  .surface-card:hover .surface-icon-lg line,
+  .surface-card:hover .surface-icon-lg rect,
+  .surface-card:hover .surface-icon-lg path {
+    stroke: rgb(202 138 4);
+    transition: stroke 250ms;
+  }
+
+  .surface-card:hover .surface-icon circle[fill],
+  .surface-card:hover .surface-icon-lg circle[fill] {
+    fill: rgb(202 138 4);
+    transition: fill 250ms;
+  }
+
+  .surface-label {
+    font-family: 'Instrument Serif', serif;
+    font-size: 1.375rem;
+    line-height: 1.1;
+    color: rgb(28 25 23);
+    margin: 0 0 6px;
+    letter-spacing: -0.01em;
+  }
+
+  .surface-label-lg {
+    font-family: 'Instrument Serif', serif;
+    font-size: 2.25rem;
+    line-height: 1.05;
+    color: rgb(28 25 23);
+    margin: 0;
+    letter-spacing: -0.015em;
+  }
+
+  .surface-tag {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: rgb(168 162 158);
+    margin: 0;
+    transition: color 250ms;
+  }
+
+  .surface-card:hover .surface-tag {
+    color: rgb(180 132 25);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .surface-card { transition: border-color 200ms, background-color 200ms; }
+    .surface-card:hover { transform: none; }
+  }
+
+  /* ===== Chalk, then a tarp — 5-frame strip ===== */
+  .madegone-strip {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 78%;
+    gap: 16px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 8px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(28,25,23,0.15) transparent;
+  }
+  .madegone-strip::-webkit-scrollbar { height: 4px; }
+  .madegone-strip::-webkit-scrollbar-thumb {
+    background: rgba(28,25,23,0.15);
+    border-radius: 2px;
+  }
+
+  @media (min-width: 768px) {
+    .madegone-strip {
+      grid-auto-columns: 1fr;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+      overflow: visible;
+      padding-bottom: 0;
+    }
+  }
+
+  .madegone-frame { scroll-snap-align: start; margin: 0; }
+
+  .madegone-img {
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    background: #e7e5e4;
+    margin-bottom: 14px;
+    box-shadow: 0 12px 28px -12px rgba(28,25,23,0.18);
+  }
+  .madegone-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 700ms cubic-bezier(0.22,1,0.36,1);
+  }
+  .madegone-frame:hover .madegone-img img {
+    transform: scale(1.03);
+  }
+
+  .madegone-frame figcaption {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    font-family: 'Instrument Serif', serif;
+  }
+  .madegone-num {
+    font-size: 0.75rem;
+    color: rgb(168 162 158);
+    letter-spacing: 0.1em;
+    font-feature-settings: 'tnum';
+  }
+  .madegone-label {
+    font-size: 1.5rem;
+    font-style: italic;
+    color: rgb(41 37 36);
+    letter-spacing: -0.01em;
+  }
+
+  .madegone-coda {
+    font-family: 'Instrument Serif', serif;
+    font-size: 1.125rem;
+    color: rgb(87 83 78);
+    margin-top: 4rem;
+    text-align: left;
+    max-width: 32rem;
+  }
+  @media (min-width: 768px) {
+    .madegone-coda {
+      margin-top: 6rem;
+      font-size: 1.25rem;
+    }
+  }
+
+  /* ===== From the studio — notes grid ===== */
+  .notes-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  @media (min-width: 768px) {
+    .notes-grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 28px;
+    }
+  }
+
+  .note-card {
+    display: block;
+    padding: 28px 28px 32px;
+    background: #fefdf9;
+    border: 1px solid rgb(231 229 228);
+    border-radius: 8px;
+    text-decoration: none;
+    transition: transform 350ms cubic-bezier(0.22, 1, 0.36, 1), border-color 250ms, box-shadow 350ms;
+  }
+
+  .note-card:hover {
+    transform: translateY(-3px);
+    border-color: rgb(202 138 4);
+    box-shadow: 0 1px 2px rgba(28,25,23,0.04), 0 12px 24px -10px rgba(202, 138, 4, 0.18);
+  }
+
+  .note-date {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: rgb(168 162 158);
+    margin: 0 0 14px;
+  }
+
+  .note-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: 1.625rem;
+    line-height: 1.15;
+    color: rgb(28 25 23);
+    letter-spacing: -0.015em;
+    margin: 0 0 14px;
+  }
+
+  .note-tease {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: rgb(87 83 78);
+    margin: 0 0 20px;
+  }
+
+  .note-cta {
+    font-size: 0.85rem;
+    color: rgb(180 132 25);
+    margin: 0;
+    font-weight: 500;
+  }
+</style>

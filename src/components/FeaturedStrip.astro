@@ -1,0 +1,22 @@
+---
+interface Props {
+  imageUrl: string
+  alt: string
+  caption?: string
+  aspectRatio?: '16/9' | '21/9' | '4/3'
+}
+
+const { imageUrl, alt, caption, aspectRatio = '16/9' } = Astro.props as Props
+const aspectClass = `aspect-[${aspectRatio}]`
+---
+
+<section class="my-20">
+  <div class={`${aspectClass} overflow-hidden bg-stone-200`}>
+    <img src={imageUrl} alt={alt} class="w-full h-full object-cover" loading="lazy" />
+  </div>
+  {caption ? (
+    <div class="max-w-5xl mx-auto px-6 mt-3">
+      <p class="text-xs uppercase tracking-widest text-stone-500">{caption}</p>
+    </div>
+  ) : null}
+</section>

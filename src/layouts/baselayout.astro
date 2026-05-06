@@ -1,0 +1,484 @@
+---
+import ContactDrawer from '../components/ContactDrawer.astro'
+import { sanityClient } from '../lib/sanity.js'
+import '../styles/global.css'
+
+interface Props {
+  title?: string
+  description?: string
+}
+
+const { title, description } = Astro.props as Props
+const pageTitle = title || 'Autumn Z Art'
+const pageDescription = description || 'Award-winning chalk and public art for businesses, festivals, and communities.'
+
+// =============================================
+// SITE CONSTANTS — UPDATE BEFORE DEPLOY
+// =============================================
+// Replace SITE_URL with the real production domain before going live.
+// The schema markup below uses this value as the canonical identifier.
+const SITE_URL = 'https://autumnzart.com'
+
+// =============================================
+// STATUS BAR — pull next public-facing event
+// =============================================
+const todayISO = new Date().toISOString().split('T')[0]
+
+const nextPublicEvent = await sanityClient.fetch(
+  `*[_type == "event" && eventType in ["festival", "live", "exhibition"] && (
+    (defined(endDate) && endDate >= $today) ||
+    (!defined(endDate) && startDate >= $today)
+  )] | order(startDate asc) [0] {
+    title,
+    startDate,
+    location,
+    url
+  }`,
+  { today: todayISO }
+)
+
+const currentStatus = 'Booking summer festivals · 2026'
+
+let statusEventLabel = null
+if (nextPublicEvent) {
+  const d = new Date(nextPublicEvent.startDate)
+  const monthShort = d.toLocaleDateString('en-US', { month: 'short' })
+  const day = d.getDate()
+  const dateBit = `${monthShort} ${day}`
+  const venueBit = nextPublicEvent.title
+  const locBit = nextPublicEvent.location ? `, ${nextPublicEvent.location}` : ''
+  statusEventLabel = `Next up: ${dateBit} · ${venueBit}${locBit}`
+}
+
+// =============================================
+// SCHEMA MARKUP (JSON-LD)
+// =============================================
+// Three schemas, all linked together via @id references so search engines
+// understand they describe the same connected entities.
+//
+// 1. Person — Autumn herself. Powers her name search results.
+// 2. WebSite — the site as a publication entity.
+// 3. ProfessionalService — her commission business. Powers service searches.
+
+const personSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  '@id': `${SITE_URL}/#person`,
+  name: 'Autumn Zaehringer',
+  alternateName: 'Autumn Z',
+  jobTitle: 'Chalk, Mural, Window, and Pet Portrait Artist',
+  description: 'Iowa-based artist creating chalk festival pieces, hand-painted windows, custom murals, and oil pet portraits. Travels worldwide for commissions.',
+  url: SITE_URL,
+  image: `${SITE_URL}/images/maplegrove.jpg`,
+  sameAs: [
+    'https://instagram.com/autzart',
+  ],
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: 'Cedar Rapids',
+    addressRegion: 'IA',
+    addressCountry: 'US',
+  },
+  email: 'aezaehri@gmail.com',
+  worksFor: {
+    '@id': `${SITE_URL}/#business`,
+  },
+}
+
+const websiteSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  '@id': `${SITE_URL}/#website`,
+  url: SITE_URL,
+  name: 'Autumn Z Art',
+  description: 'Iowa chalk, mural, and pet portrait artist. Booking commissions worldwide.',
+  publisher: {
+    '@id': `${SITE_URL}/#person`,
+  },
+  inLanguage: 'en-US',
+}
+
+const businessSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'ProfessionalService',
+  '@id': `${SITE_URL}/#business`,
+  name: 'Autumn Z Art',
+  description: 'Custom chalk art, murals, hand-painted windows, and oil pet portraits for businesses, festivals, and private clients. Commissions open for 2026 and 2027.',
+  url: SITE_URL,
+  image: `${SITE_URL}/images/maplegrove.jpg`,
+  founder: {
+    '@id': `${SITE_URL}/#person`,
+  },
+  email: 'aezaehri@gmail.com',
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: 'Cedar Rapids',
+    addressRegion: 'IA',
+    addressCountry: 'US',
+  },
+  // Service area — worldwide. Travel covered in commission quote.
+  areaServed: {
+    '@type': 'Place',
+    name: 'Worldwide',
+  },
+  // Lists the offerings without going full Service-schema-per-item.
+  // This is enough for search engines to know what she does.
+  makesOffer: [
+    {
+      '@type': 'Offer',
+      itemOffered: {
+        '@type': 'Service',
+        name: 'Chalk art',
+        description: 'Festival commissions, brand activations, public art weekends. Designed for photography.',
+      },
+    },
+    {
+      '@type': 'Offer',
+      itemOffered: {
+        '@type': 'Service',
+        name: 'Window painting',
+        description: 'Holiday windows, grand openings, seasonal storefront art. Live painted on glass.',
+      },
+    },
+    {
+      '@type': 'Offer',
+      itemOffered: {
+        '@type': 'Service',
+        name: 'Pet portraits',
+        description: 'Hand-painted oil portraits on 5×7 wrapped canvas. One animal per canvas.',
+      },
+      price: '147',
+      priceCurrency: 'USD',
+    },
+    {
+      '@type': 'Offer',
+      itemOffered: {
+        '@type': 'Service',
+        name: 'Murals',
+        description: 'Permanent interior and exterior murals for businesses and communities.',
+      },
+    },
+    {
+      '@type': 'Offer',
+      itemOffered: {
+        '@type': 'Service',
+        name: 'Custom commissions',
+        description: 'Ink, grayscale, digital, or experimental formats by request.',
+      },
+    },
+  ],
+  sameAs: [
+    'https://instagram.com/autzart',
+  ],
+}
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="description" content={pageDescription} />
+    <title>{pageTitle}</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+
+    <!-- Schema markup: Person, WebSite, ProfessionalService -->
+    <script type="application/ld+json" set:html={JSON.stringify(personSchema)} />
+    <script type="application/ld+json" set:html={JSON.stringify(websiteSchema)} />
+    <script type="application/ld+json" set:html={JSON.stringify(businessSchema)} />
+  </head>
+  <body class="bg-stone-50 text-stone-900 font-sans antialiased">
+
+    <!-- Status bar -->
+    <div class="bg-stone-900 text-stone-50 text-xs relative z-50">
+      <div class="max-w-6xl mx-auto px-6 py-2.5 flex items-center justify-center gap-3 text-center">
+        {statusEventLabel ? (
+          <>
+            <span class="inline-flex items-center gap-2">
+              <span class="status-dot"></span>
+              <span class="text-stone-400 uppercase tracking-[0.18em] text-[10px]">Currently</span>
+            </span>
+            <span class="text-stone-600">|</span>
+            {nextPublicEvent.url ? (
+              <a
+                href={nextPublicEvent.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="hover:text-gold-400 transition truncate"
+              >
+                {statusEventLabel} <span class="text-stone-500">↗</span>
+              </a>
+            ) : (
+              <span class="truncate">{statusEventLabel}</span>
+            )}
+          </>
+        ) : (
+          <>
+            <span class="inline-flex items-center gap-2">
+              <span class="status-dot"></span>
+              <span class="text-stone-400 uppercase tracking-[0.18em] text-[10px]">Currently</span>
+            </span>
+            <span class="text-stone-600">|</span>
+            <span>{currentStatus}</span>
+          </>
+        )}
+      </div>
+    </div>
+
+    <header class="border-b border-stone-200 relative z-50 bg-stone-50">
+      <nav class="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
+        <a href="/" class="font-serif text-xl tracking-tight relative z-50">Autumn Z Art</a>
+
+        <div class="hidden md:flex items-center gap-8 text-sm text-stone-600">
+          <a href="/work" class="hover:text-stone-900 transition border-b-2 border-transparent aria-[current=page]:border-gold-500 pb-1" aria-current={Astro.url.pathname.startsWith('/work') ? 'page' : undefined}>Work</a>
+          <a href="/services" class="hover:text-stone-900 transition border-b-2 border-transparent aria-[current=page]:border-gold-500 pb-1" aria-current={Astro.url.pathname.startsWith('/services') ? 'page' : undefined}>Services</a>
+          <a href="/about" class="hover:text-stone-900 transition border-b-2 border-transparent aria-[current=page]:border-gold-500 pb-1" aria-current={Astro.url.pathname.startsWith('/about') ? 'page' : undefined}>About</a>
+        </div>
+
+        <button type="button" data-inquire="general" class="hidden md:inline-block text-sm px-4 py-2 rounded-full border border-stone-300 hover:border-stone-900 transition cursor-pointer bg-transparent">
+          Need an Artist? →
+        </button>
+
+        <button
+          id="mobile-menu-toggle"
+          class="md:hidden relative z-50 w-10 h-10 flex flex-col items-center justify-center gap-1.5"
+          aria-label="Toggle menu"
+          aria-expanded="false"
+          aria-controls="mobile-menu"
+        >
+          <span class="hamburger-line block w-6 h-0.5 bg-stone-900 transition-all duration-300 origin-center"></span>
+          <span class="hamburger-line block w-6 h-0.5 bg-stone-900 transition-all duration-300 origin-center"></span>
+          <span class="hamburger-line block w-6 h-0.5 bg-stone-900 transition-all duration-300 origin-center"></span>
+        </button>
+      </nav>
+
+      <div
+        id="mobile-menu"
+        class="md:hidden fixed inset-0 bg-stone-50 z-40 opacity-0 pointer-events-none transition-opacity duration-300 flex flex-col"
+        aria-hidden="true"
+      >
+        <div class="flex-1 flex flex-col justify-center items-center gap-8 px-6">
+          <a href="/work" class="font-serif text-4xl text-stone-900 hover:text-stone-600 transition">Work</a>
+          <a href="/festivals" class="font-serif text-4xl text-stone-900 hover:text-stone-600 transition">Festivals</a>
+          <a href="/services" class="font-serif text-4xl text-stone-900 hover:text-stone-600 transition">Services</a>
+          <a href="/about" class="font-serif text-4xl text-stone-900 hover:text-stone-600 transition">About</a>
+          <button type="button" data-inquire="general" class="mt-8 inline-block px-8 py-4 bg-stone-900 text-stone-50 rounded-md text-sm font-medium hover:bg-stone-800 transition cursor-pointer border-none">
+            Start a commission
+          </button>
+        </div>
+        <div class="border-t border-stone-200 px-6 py-6 text-center">
+          <p class="text-sm text-stone-500">aezaehri@gmail.com · @autzart</p>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <slot />
+    </main>
+
+    <!-- =========================================
+         FOOTER — quiet, content-focused
+         ========================================= -->
+    <footer class="border-t border-stone-200 mt-24 bg-stone-100">
+
+      <div class="max-w-5xl mx-auto px-6 py-16 md:py-20 grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-12">
+
+        <!-- Newsletter (left, ~half width) -->
+        <div class="md:col-span-7">
+          <h3 class="font-serif text-2xl text-stone-900 mb-2">Notes between the pieces.</h3>
+          <p class="text-sm text-stone-600 mb-6 max-w-md">
+            A few times a year, when there's something worth saying.
+          </p>
+
+          <form
+            id="footer-newsletter"
+            action="https://app.kit.com/forms/9412451/subscriptions"
+            method="post"
+            class="max-w-md"
+          >
+            <div class="flex flex-col sm:flex-row gap-3 mb-3">
+              <input
+                type="text"
+                name="fields[first_name]"
+                placeholder="First name"
+                aria-label="First name"
+                autocomplete="given-name"
+                class="footer-input flex-1 bg-transparent border-0 border-b border-stone-300 focus:border-stone-900 outline-none px-0 py-2 text-sm text-stone-900 placeholder-stone-400 transition-colors"
+              />
+              <input
+                type="email"
+                name="email_address"
+                placeholder="Email address"
+                aria-label="Email address"
+                autocomplete="email"
+                required
+                class="footer-input flex-1 bg-transparent border-0 border-b border-stone-300 focus:border-stone-900 outline-none px-0 py-2 text-sm text-stone-900 placeholder-stone-400 transition-colors"
+              />
+            </div>
+            <button
+              type="submit"
+              class="inline-flex items-center gap-2 px-4 py-2 bg-stone-900 text-stone-50 rounded text-xs font-medium hover:bg-stone-800 transition cursor-pointer border-none uppercase tracking-wider"
+            >
+              <span class="footer-submit-label">Subscribe</span>
+              <span>→</span>
+            </button>
+            <p id="footer-newsletter-status" class="text-xs text-stone-500 italic min-h-[1rem] mt-3" aria-live="polite"></p>
+          </form>
+        </div>
+
+        <!-- Browse (right) -->
+        <div class="md:col-span-3">
+          <p class="text-[10px] uppercase tracking-[0.2em] text-stone-500 mb-4">Browse</p>
+          <ul class="flex flex-col gap-2 text-sm text-stone-700">
+            <li><a href="/work" class="hover:text-gold-700 transition">Work</a></li>
+            <li><a href="/services" class="hover:text-gold-700 transition">Services</a></li>
+            <li><a href="/about" class="hover:text-gold-700 transition">About</a></li>
+            <li><a href="/notes" class="hover:text-gold-700 transition">Notes</a></li>
+          </ul>
+        </div>
+
+        <!-- Contact (far right) -->
+        <div class="md:col-span-2">
+          <p class="text-[10px] uppercase tracking-[0.2em] text-stone-500 mb-4">Contact</p>
+          <ul class="flex flex-col gap-2 text-sm text-stone-700">
+            <li><a href="mailto:aezaehri@gmail.com" class="hover:text-gold-700 transition break-all">Email</a></li>
+            <li><a href="https://instagram.com/autzart" class="hover:text-gold-700 transition">Instagram</a></li>
+          </ul>
+        </div>
+
+      </div>
+
+      <!-- Legal bar — single tight strip -->
+      <div class="border-t border-stone-200">
+        <div class="max-w-5xl mx-auto px-6 py-5 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs text-stone-500">
+          <p>
+            <span class="font-serif text-stone-900 text-sm mr-3">Autumn Z Art</span>
+            <span class="text-stone-400">·</span>
+            <span class="ml-3">Cedar Rapids, IA</span>
+            <span class="text-stone-400 ml-3">·</span>
+            <span class="ml-3">© {new Date().getFullYear()}</span>
+          </p>
+          <div class="flex gap-5 flex-wrap">
+            <a href="/privacy" class="hover:text-stone-900 transition">Privacy</a>
+            <a href="https://priscillazaehringer.com" class="hover:text-stone-900 transition">Site by priscillazaehringer.com</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <style>
+      .status-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: rgb(202 138 4);
+        box-shadow: 0 0 0 0 rgba(202, 138, 4, 0.7);
+        animation: status-pulse 2.4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        flex-shrink: 0;
+      }
+
+      @keyframes status-pulse {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(202, 138, 4, 0.5); }
+        50% { box-shadow: 0 0 0 5px rgba(202, 138, 4, 0); }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .status-dot { animation: none; }
+      }
+
+      .footer-input:focus {
+        border-bottom-color: rgb(28 25 23);
+      }
+    </style>
+
+    <script>
+      const toggle = document.getElementById('mobile-menu-toggle')
+      const menu = document.getElementById('mobile-menu')
+      const lines = document.querySelectorAll('.hamburger-line')
+      let isOpen = false
+
+      function setMenu(open) {
+        isOpen = open
+        if (open) {
+          menu.classList.remove('opacity-0', 'pointer-events-none')
+          menu.classList.add('opacity-100')
+          menu.setAttribute('aria-hidden', 'false')
+          toggle.setAttribute('aria-expanded', 'true')
+          document.body.style.overflow = 'hidden'
+
+          lines[0].style.transform = 'translateY(8px) rotate(45deg)'
+          lines[1].style.opacity = '0'
+          lines[2].style.transform = 'translateY(-8px) rotate(-45deg)'
+        } else {
+          menu.classList.add('opacity-0', 'pointer-events-none')
+          menu.classList.remove('opacity-100')
+          menu.setAttribute('aria-hidden', 'true')
+          toggle.setAttribute('aria-expanded', 'false')
+          document.body.style.overflow = ''
+
+          lines[0].style.transform = ''
+          lines[1].style.opacity = ''
+          lines[2].style.transform = ''
+        }
+      }
+
+      toggle.addEventListener('click', () => setMenu(!isOpen))
+
+      menu.querySelectorAll('a, button').forEach((link) => {
+        link.addEventListener('click', () => setMenu(false))
+      })
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && isOpen) setMenu(false)
+      })
+
+      // Footer newsletter
+      const newsletterForm = document.getElementById('footer-newsletter')
+      const newsletterStatus = document.getElementById('footer-newsletter-status')
+
+      if (newsletterForm && newsletterStatus) {
+        newsletterForm.addEventListener('submit', async (e) => {
+          e.preventDefault()
+
+          const submitBtn = newsletterForm.querySelector('button[type="submit"]')
+          const labelEl = newsletterForm.querySelector('.footer-submit-label')
+          const originalLabel = labelEl ? labelEl.textContent : 'Subscribe'
+
+          if (labelEl) labelEl.textContent = 'Sending…'
+          if (submitBtn) submitBtn.disabled = true
+          newsletterStatus.textContent = ''
+          newsletterStatus.style.color = ''
+
+          try {
+            const formData = new FormData(newsletterForm)
+            const response = await fetch(newsletterForm.action, {
+              method: 'POST',
+              body: formData,
+              headers: { Accept: 'application/json' },
+            })
+
+            if (response.ok) {
+              newsletterStatus.textContent = 'Got it — check your inbox to confirm.'
+              newsletterStatus.style.color = 'rgb(180 132 25)'
+              newsletterForm.reset()
+              if (labelEl) labelEl.textContent = 'Subscribed'
+            } else {
+              throw new Error('Submission failed')
+            }
+          } catch (err) {
+            newsletterStatus.textContent = "Hmm, that didn't go through. Try again, or email directly."
+            newsletterStatus.style.color = 'rgb(180 50 50)'
+            if (labelEl) labelEl.textContent = originalLabel
+          } finally {
+            if (submitBtn) submitBtn.disabled = false
+          }
+        })
+      }
+    </script>
+
+    <ContactDrawer />
+
+  </body>
+</html>

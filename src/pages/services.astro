@@ -1,0 +1,236 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+import FinalCTA from '../components/FinalCTA.astro'
+import { sanityClient, urlFor } from '../lib/sanity.js'
+
+// Pull one featured image per medium from Sanity (same pattern as the homepage).
+const featuredByMedium = await sanityClient.fetch(
+  `{
+    "chalk":    *[_type == "project" && medium == "chalk"    && defined(heroImage)] | order(featured desc, year desc, _createdAt desc)[0]{ heroImage, title },
+    "window":   *[_type == "project" && medium == "window"   && defined(heroImage)] | order(featured desc, year desc, _createdAt desc)[0]{ heroImage, title },
+    "portrait": *[_type == "project" && medium == "portrait" && defined(heroImage)] | order(featured desc, year desc, _createdAt desc)[0]{ heroImage, title },
+    "mural":    *[_type == "project" && medium == "mural"    && defined(heroImage)] | order(featured desc, year desc, _createdAt desc)[0]{ heroImage, title },
+    "other":    *[_type == "project" && medium == "other"    && defined(heroImage)] | order(featured desc, year desc, _createdAt desc)[0]{ heroImage, title }
+  }`
+)
+
+// Service definitions, in popularity order: chalk, windows, portraits, murals, custom.
+// Note: there's no `href` field anymore — each service row is a div, not a link.
+// The "Inquire about [service]" button uses data-inquire to open the contact drawer.
+const services = [
+  {
+    slug: 'chalk',
+    label: 'Chalk',
+    tagline: 'Pavement, festivals, a single weekend.',
+    voice: 'Festival commissions, brand activations, public art weekends. Designed for photography, with the work washing away in the next rain.',
+    surface: 'Pavement, sidewalk, walls',
+    leadTime: '4–6 weeks',
+    priceRange: 'By scope',
+    image: featuredByMedium.chalk?.heroImage,
+    altTitle: featuredByMedium.chalk?.title,
+    placeholder: 'Chalk · festival commission',
+  },
+  {
+    slug: 'windows',
+    label: 'Windows',
+    tagline: 'Live painted on glass.',
+    voice: 'Holiday windows, grand openings, anything seasonal. The work goes up on-site and comes off cleanly once the season ends.',
+    surface: 'Storefront glass',
+    leadTime: '2–3 weeks',
+    priceRange: 'By scope',
+    image: featuredByMedium.window?.heroImage,
+    altTitle: featuredByMedium.window?.title,
+    placeholder: 'Window · holiday storefront',
+  },
+  {
+    slug: 'portraits',
+    label: 'Pet portraits',
+    tagline: 'Hand-painted oil. One animal per canvas.',
+    voice: 'Painted from a photo on a 5×7 wrapped canvas. Booked through a calendar of weekly ship dates.',
+    surface: '5×7 wrapped canvas',
+    leadTime: 'Picks a ship date',
+    priceRange: '$147 flat',
+    image: featuredByMedium.portrait?.heroImage,
+    altTitle: featuredByMedium.portrait?.title,
+    placeholder: 'Pet portrait · 5×7 oil on canvas',
+  },
+  {
+    slug: 'murals',
+    label: 'Murals',
+    tagline: 'Permanent work, public-facing.',
+    voice: 'Interior or exterior, hand-painted. For businesses and communities ready to commit to a wall for a decade.',
+    surface: 'Interior + exterior walls',
+    leadTime: '6–10 weeks',
+    priceRange: 'By scope',
+    image: featuredByMedium.mural?.heroImage,
+    altTitle: featuredByMedium.mural?.title,
+    placeholder: 'Mural · interior accent wall',
+  },
+  {
+    slug: 'commissions',
+    label: 'Custom & other',
+    tagline: 'Something else in mind?',
+    voice: "Ink, grayscale, digital, or a format I haven't tried yet. If it's strange and worth doing, get in touch.",
+    surface: 'Varies',
+    leadTime: 'Varies',
+    priceRange: 'By scope',
+    image: featuredByMedium.other?.heroImage,
+    altTitle: featuredByMedium.other?.title,
+    placeholder: 'Custom commission · ink + grayscale study',
+  },
+]
+
+// Resolve image URLs (or null → stripe placeholder).
+const servicesForDisplay = services.map((s) => ({
+  ...s,
+  imageUrl: s.image ? urlFor(s.image).width(800).height(1000).fit('crop').url() : null,
+}))
+
+const faqs = [
+  { q: 'How far do you travel?', a: 'Based in Iowa with easy travel throughout the Midwest. Willing to travel nationally and internationally, with travel covered in the quote.' },
+  { q: 'How far in advance should I book?', a: 'Windows: 2–3 weeks. Chalk: 4–6 weeks. Murals: 6–10 weeks. Festival season (summer) and holidays fill first — earlier is always better.' },
+  { q: 'Can you match a brand or style guide?', a: 'Yes. Send your guidelines, brand colors, and any reference. I sketch a concept before paint touches anything, so you sign off on direction first.' },
+  { q: 'What about weather, for outdoor work?', a: 'Chalk and exterior murals are weather-dependent.' },
+  { q: 'Do you do residential work?', a: 'Murals, yes. Window painting is currently commercial-only.' },
+]
+---
+
+<BaseLayout title="Services — Autumn Z Art" description="Chalk, windows, pet portraits, murals, and custom commissions by Autumn Zaehringer.">
+
+  <!-- HERO -->
+  <section class="max-w-6xl mx-auto px-6 pt-24 pb-20 md:pb-24 reveal">
+    <p class="eyebrow mb-8">Services</p>
+    <h1 class="h1-display mb-10 max-w-5xl">
+      Five ways to<br/>
+      <em>work with me.</em>
+    </h1>
+    <p class="hero-lede">
+      Pick the medium. I'll meet you there.
+    </p>
+  </section>
+
+
+  <!-- EDITORIAL INDEX -->
+  <section class="max-w-6xl mx-auto px-6 pb-24">
+    <div class="border-t border-stone-200 mb-4"></div>
+    <ul class="divide-y divide-stone-200">
+      {servicesForDisplay.map((s, i) => {
+        const num = String(i + 1).padStart(2, '0')
+        return (
+          <li id={s.slug} class="reveal scroll-mt-24">
+            <div class="grid grid-cols-12 gap-4 md:gap-8 py-10 md:py-14 items-start">
+              <div class="col-span-2 md:col-span-1">
+                <p class="font-serif text-3xl md:text-4xl text-gold-600 leading-none">{num}</p>
+              </div>
+
+              <div class="col-span-10 md:col-span-4">
+                <div class="overflow-hidden aspect-[4/5] bg-stone-100 rounded-md">
+                  {s.imageUrl ? (
+                    <img
+                      src={s.imageUrl}
+                      alt={s.altTitle || s.label}
+                      class="w-full h-full object-cover transition duration-700"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div class="w-full h-full flex items-end p-4 stripe-placeholder">
+                      <p class="text-[10px] uppercase tracking-[0.2em] text-stone-500 font-mono">{s.placeholder}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div class="col-span-12 md:col-span-7 md:pt-2">
+                <h2 class="font-serif font-normal text-4xl md:text-6xl leading-[1.0] tracking-tight mb-4 md:mb-6">
+                  {s.label}.
+                </h2>
+                <p class="font-serif italic text-xl md:text-2xl text-stone-700 leading-snug mb-5 md:mb-8 max-w-xl">
+                  {s.tagline}
+                </p>
+                <p class="text-base text-stone-600 leading-relaxed max-w-lg mb-8">{s.voice}</p>
+
+                <dl class="grid grid-cols-3 gap-6 max-w-lg text-sm mb-10">
+                  <div>
+                    <dt class="text-[10px] uppercase tracking-[0.2em] text-stone-400 mb-1">Surface</dt>
+                    <dd class="text-stone-700">{s.surface}</dd>
+                  </div>
+                  <div>
+                    <dt class="text-[10px] uppercase tracking-[0.2em] text-stone-400 mb-1">Lead time</dt>
+                    <dd class="text-stone-700">{s.leadTime}</dd>
+                  </div>
+                  <div>
+                    <dt class="text-[10px] uppercase tracking-[0.2em] text-stone-400 mb-1">Pricing</dt>
+                    <dd class="text-gold-600 font-medium">{s.priceRange}</dd>
+                  </div>
+                </dl>
+
+                <button
+                  type="button"
+                  data-inquire={s.slug}
+                  class="inquire-btn group inline-flex items-center gap-2 px-5 py-3 bg-stone-900 text-stone-50 rounded-md text-sm font-medium hover:bg-stone-800 transition"
+                >
+                  Inquire about {s.label.toLowerCase()}
+                  <span class="transition-transform group-hover:translate-x-1">→</span>
+                </button>
+              </div>
+            </div>
+          </li>
+        )
+      })}
+    </ul>
+  </section>
+
+  <!-- FAQ -->
+  <section class="max-w-3xl mx-auto px-6 py-24 reveal">
+    <p class="eyebrow mb-4">Questions</p>
+    <h2 class="h2-section mb-12">Things people ask first.</h2>
+    <div class="divide-y divide-stone-200 border-t border-b border-stone-200">
+      {faqs.map((faq) => (
+        <details class="group py-5">
+          <summary class="flex items-center justify-between cursor-pointer list-none">
+            <h3 class="font-serif text-lg text-stone-900 pr-6">{faq.q}</h3>
+            <span class="text-stone-400 group-open:rotate-45 transition-transform duration-200 text-2xl leading-none flex-shrink-0">+</span>
+          </summary>
+          <p class="text-sm text-stone-600 leading-relaxed mt-4 pr-10">{faq.a}</p>
+        </details>
+      ))}
+    </div>
+  </section>
+
+<FinalCTA
+    heading="Have something in mind?"
+    subheading="Commissions open for 2026 & 2027."
+    buttonLabel="Start the conversation"
+    inquireKey="commissions"
+  />
+
+</BaseLayout>
+
+<style>
+  .reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 700ms cubic-bezier(0.22, 1, 0.36, 1), transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .reveal.is-visible { opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: reduce) {
+    .reveal { opacity: 1; transform: none; transition: none; }
+  }
+  details > summary::-webkit-details-marker { display: none; }
+  .stripe-placeholder {
+    background-image: repeating-linear-gradient(135deg, rgba(28,25,23,0.04) 0 14px, rgba(28,25,23,0.08) 14px 28px);
+  }
+</style>
+
+<script>
+  const reveals = document.querySelectorAll('.reveal')
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('is-visible')
+        observer.unobserve(entry.target)
+      }
+    })
+  }, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' })
+  reveals.forEach((el) => observer.observe(el))
+</script>

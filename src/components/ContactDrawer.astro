@@ -1,0 +1,317 @@
+---
+const FORMSPREE_ENDPOINT = 'https://formspree.io/f/xdabazap'
+---
+
+<div
+  id="contact-drawer-backdrop"
+  aria-hidden="true"
+  style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(28,25,23,0.4);opacity:0;pointer-events:none;transition:opacity 300ms ease;z-index:9998;"
+></div>
+
+<aside
+  id="contact-drawer"
+  role="dialog"
+  aria-labelledby="drawer-title"
+  aria-hidden="true"
+  style="position:fixed;top:0;right:0;bottom:0;width:100%;max-width:480px;background:#fafaf9;z-index:9999;transform:translateX(100%);transition:transform 300ms ease;box-shadow:0 0 60px rgba(28,25,23,0.3);overflow-y:auto;"
+>
+
+  <button
+    id="contact-drawer-close"
+    aria-label="Close inquiry form"
+    type="button"
+    style="position:absolute;top:20px;right:20px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:transparent;border:none;color:rgb(120,113,108);cursor:pointer;z-index:1;"
+  >
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+      <line x1="4" y1="4" x2="16" y2="16" />
+      <line x1="16" y1="4" x2="4" y2="16" />
+    </svg>
+  </button>
+
+  <div style="padding:64px 32px;">
+
+    <div id="drawer-form-view">
+      <p style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.2em;color:rgb(120,113,108);margin:0 0 16px;font-family:'Inter',sans-serif;">Inquiry</p>
+      <h2
+        id="drawer-title"
+        style="font-family:'Instrument Serif',serif;font-size:2.25rem;line-height:1.1;color:rgb(28,25,23);margin:0 0 16px;letter-spacing:-0.01em;font-weight:400;"
+      >
+        Tell me about<br/>your project.
+      </h2>
+      <p style="font-size:0.875rem;color:rgb(87,83,78);line-height:1.5;margin:0 0 40px;font-family:'Inter',sans-serif;">
+        I read every inquiry and reply within 48 hours.
+      </p>
+
+      <form id="contact-drawer-form" action={FORMSPREE_ENDPOINT} method="POST">
+
+        <input type="hidden" name="service" id="drawer-service-input" value="" />
+
+        <div style="margin-bottom:28px;">
+          <label
+            for="drawer-service-display"
+            style="display:block;font-family:'Instrument Serif',serif;font-size:1.0625rem;color:rgb(28,25,23);margin:0 0 8px;"
+          >What's the surface?</label>
+          <select
+            id="drawer-service-display"
+            name="service_display"
+            required
+            class="drawer-input drawer-select"
+            style="width:100%;padding:10px 24px 10px 0;background:transparent;border:none;border-bottom:1px solid rgb(214,211,209);font-family:'Inter',sans-serif;font-size:0.9375rem;color:rgb(28,25,23);box-sizing:border-box;appearance:none;-webkit-appearance:none;cursor:pointer;background-image:url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none' stroke='%2378716c' stroke-width='1.5'%3E%3Cpolyline points='1 1 6 6 11 1'/%3E%3C/svg%3E&quot;);background-repeat:no-repeat;background-position:right 4px center;"
+          >
+            <option value="">Pick one</option>
+            <option value="Chalk (pavement)">Chalk · pavement</option>
+            <option value="Windows (glass)">Windows · glass</option>
+            <option value="Pet portraits (canvas)">Pet portraits · canvas</option>
+            <option value="Murals (a wall)">Murals · a wall</option>
+            <option value="Custom (something else)">Custom · something else</option>
+          </select>
+        </div>
+
+        <div style="margin-bottom:28px;">
+          <label
+            for="drawer-name"
+            style="display:block;font-family:'Instrument Serif',serif;font-size:1.0625rem;color:rgb(28,25,23);margin:0 0 8px;"
+          >What's your name?</label>
+          <input
+            type="text"
+            id="drawer-name"
+            name="name"
+            required
+            autocomplete="name"
+            class="drawer-input"
+            style="width:100%;padding:10px 0;background:transparent;border:none;border-bottom:1px solid rgb(214,211,209);font-family:'Inter',sans-serif;font-size:0.9375rem;color:rgb(28,25,23);box-sizing:border-box;"
+          />
+        </div>
+
+        <div style="margin-bottom:28px;">
+          <label
+            for="drawer-email"
+            style="display:block;font-family:'Instrument Serif',serif;font-size:1.0625rem;color:rgb(28,25,23);margin:0 0 8px;"
+          >Where can I reply?</label>
+          <input
+            type="email"
+            id="drawer-email"
+            name="email"
+            required
+            autocomplete="email"
+            class="drawer-input"
+            style="width:100%;padding:10px 0;background:transparent;border:none;border-bottom:1px solid rgb(214,211,209);font-family:'Inter',sans-serif;font-size:0.9375rem;color:rgb(28,25,23);box-sizing:border-box;"
+          />
+        </div>
+
+        <div style="margin-bottom:28px;">
+          <label
+            for="drawer-when"
+            style="display:block;font-family:'Instrument Serif',serif;font-size:1.0625rem;color:rgb(28,25,23);margin:0 0 8px;"
+          >When are you thinking?</label>
+          <input
+            type="text"
+            id="drawer-when"
+            name="when"
+            placeholder="Spring 2026 · this summer · no rush"
+            class="drawer-input"
+            style="width:100%;padding:10px 0;background:transparent;border:none;border-bottom:1px solid rgb(214,211,209);font-family:'Inter',sans-serif;font-size:0.9375rem;color:rgb(28,25,23);box-sizing:border-box;"
+          />
+        </div>
+
+        <div style="margin-bottom:28px;">
+          <label
+            for="drawer-message"
+            style="display:block;font-family:'Instrument Serif',serif;font-size:1.0625rem;color:rgb(28,25,23);margin:0 0 8px;"
+          >Anything else worth knowing?</label>
+          <textarea
+            id="drawer-message"
+            name="message"
+            rows="4"
+            placeholder="Tell me about the venue, audience, vibe, brand colors, anything"
+            class="drawer-input"
+            style="width:100%;padding:10px 0;background:transparent;border:none;border-bottom:1px solid rgb(214,211,209);font-family:'Inter',sans-serif;font-size:0.9375rem;color:rgb(28,25,23);box-sizing:border-box;resize:vertical;min-height:100px;"
+          ></textarea>
+        </div>
+
+        <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;" aria-hidden="true" />
+
+        <button
+          type="submit"
+          id="drawer-submit"
+          style="width:100%;padding:16px 24px;background:rgb(28,25,23);color:rgb(250,250,249);border:none;border-radius:6px;font-family:'Inter',sans-serif;font-size:0.875rem;font-weight:500;cursor:pointer;margin-top:12px;"
+        >Send it →</button>
+
+        <p style="font-size:0.75rem;color:rgb(120,113,108);line-height:1.5;text-align:center;margin:16px 0 0;font-family:'Inter',sans-serif;">
+          Or email <a href="mailto:aezaehri@gmail.com" style="color:rgb(180,132,25);text-decoration:underline;text-underline-offset:4px;">aezaehri@gmail.com</a> directly.
+        </p>
+      </form>
+    </div>
+
+    <div id="drawer-success-view" style="display:none;">
+      <div style="text-align:center;padding:32px 0;">
+        <div style="display:inline-flex;align-items:center;justify-content:center;width:56px;height:56px;border-radius:50%;background:rgb(254,243,199);color:rgb(180,132,25);margin:0 0 24px;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+        </div>
+        <h2 style="font-family:'Instrument Serif',serif;font-size:2.25rem;line-height:1.1;color:rgb(28,25,23);margin:0 0 16px;font-weight:400;">Got it.</h2>
+        <p style="font-size:1rem;color:rgb(87,83,78);line-height:1.5;margin:0 0 8px;font-family:'Inter',sans-serif;">I'll reply within 48 hours.</p>
+        <p style="font-size:0.875rem;color:rgb(120,113,108);line-height:1.5;margin:0 0 40px;font-family:'Inter',sans-serif;">Usually sooner — I check email a few times a day.</p>
+        <a
+          href="/work"
+          style="display:inline-block;padding:12px 24px;border:1px solid rgb(214,211,209);color:rgb(68,64,60);border-radius:6px;font-family:'Inter',sans-serif;font-size:0.875rem;font-weight:500;text-decoration:none;"
+        >Meanwhile, see the work →</a>
+      </div>
+    </div>
+
+    <div id="drawer-error-view" style="display:none;">
+      <div style="text-align:center;padding:32px 0;">
+        <h2 style="font-family:'Instrument Serif',serif;font-size:1.5rem;color:rgb(28,25,23);margin:0 0 16px;font-weight:400;">Hmm, that didn't go through.</h2>
+        <p style="font-size:0.875rem;color:rgb(87,83,78);line-height:1.6;margin:0 0 24px;font-family:'Inter',sans-serif;">
+          Easiest workaround: email me at <a href="mailto:aezaehri@gmail.com" style="color:rgb(180,132,25);text-decoration:underline;text-underline-offset:4px;">aezaehri@gmail.com</a> and I'll reply same day.
+        </p>
+        <button
+          type="button"
+          id="drawer-try-again"
+          style="background:transparent;border:none;color:rgb(68,64,60);text-decoration:underline;text-underline-offset:4px;font-family:'Inter',sans-serif;font-size:0.875rem;cursor:pointer;"
+        >Or try again →</button>
+      </div>
+    </div>
+
+  </div>
+</aside>
+
+<script is:inline>
+  (function () {
+    console.log('[ContactDrawer] script loaded');
+
+    var serviceLabelMap = {
+      chalk: 'Chalk (pavement)',
+      windows: 'Windows (glass)',
+      portraits: 'Pet portraits (canvas)',
+      murals: 'Murals (a wall)',
+      commissions: 'Custom (something else)',
+      custom: 'Custom (something else)',
+    };
+
+    function openDrawer(serviceKey) {
+      console.log('[ContactDrawer] openDrawer:', serviceKey);
+      var drawer = document.getElementById('contact-drawer');
+      var backdrop = document.getElementById('contact-drawer-backdrop');
+      var serviceInput = document.getElementById('drawer-service-input');
+      var serviceDisplay = document.getElementById('drawer-service-display');
+      var formView = document.getElementById('drawer-form-view');
+      var successView = document.getElementById('drawer-success-view');
+      var errorView = document.getElementById('drawer-error-view');
+
+      if (!drawer) return;
+
+      if (serviceKey && serviceLabelMap[serviceKey]) {
+        var label = serviceLabelMap[serviceKey];
+        if (serviceInput) serviceInput.value = label;
+        if (serviceDisplay) serviceDisplay.value = label;
+      }
+
+      drawer.style.transform = 'translateX(0)';
+      if (backdrop) {
+        backdrop.style.opacity = '1';
+        backdrop.style.pointerEvents = 'auto';
+      }
+      drawer.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+
+      if (formView) formView.style.display = 'block';
+      if (successView) successView.style.display = 'none';
+      if (errorView) errorView.style.display = 'none';
+
+      setTimeout(function () {
+        var nameInput = document.getElementById('drawer-name');
+        if (nameInput) nameInput.focus();
+      }, 350);
+    }
+
+    function closeDrawer() {
+      var drawer = document.getElementById('contact-drawer');
+      var backdrop = document.getElementById('contact-drawer-backdrop');
+      if (drawer) {
+        drawer.style.transform = 'translateX(100%)';
+        drawer.setAttribute('aria-hidden', 'true');
+      }
+      if (backdrop) {
+        backdrop.style.opacity = '0';
+        backdrop.style.pointerEvents = 'none';
+      }
+      document.body.style.overflow = '';
+    }
+
+    document.addEventListener('click', function (e) {
+      var trigger = e.target.closest('[data-inquire]');
+      if (trigger) {
+        e.preventDefault();
+        openDrawer(trigger.getAttribute('data-inquire'));
+        return;
+      }
+      if (e.target.closest('#contact-drawer-close')) {
+        closeDrawer();
+        return;
+      }
+      if (e.target.id === 'contact-drawer-backdrop') {
+        closeDrawer();
+        return;
+      }
+      if (e.target.id === 'drawer-try-again') {
+        var formView = document.getElementById('drawer-form-view');
+        var errorView = document.getElementById('drawer-error-view');
+        if (formView) formView.style.display = 'block';
+        if (errorView) errorView.style.display = 'none';
+      }
+    });
+
+    document.addEventListener('keydown', function (e) {
+      var drawer = document.getElementById('contact-drawer');
+      if (e.key === 'Escape' && drawer && drawer.getAttribute('aria-hidden') === 'false') {
+        closeDrawer();
+      }
+    });
+
+    document.addEventListener('submit', async function (e) {
+      var form = e.target;
+      if (form.id !== 'contact-drawer-form') return;
+
+      e.preventDefault();
+      var submitBtn = document.getElementById('drawer-submit');
+      var formView = document.getElementById('drawer-form-view');
+      var successView = document.getElementById('drawer-success-view');
+      var errorView = document.getElementById('drawer-error-view');
+
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Sending…';
+      }
+
+      try {
+        var formData = new FormData(form);
+        var response = await fetch(form.action, {
+          method: 'POST',
+          body: formData,
+          headers: { Accept: 'application/json' },
+        });
+
+        if (response.ok) {
+          if (formView) formView.style.display = 'none';
+          if (successView) successView.style.display = 'block';
+          form.reset();
+        } else {
+          throw new Error('Submission failed');
+        }
+      } catch (err) {
+        console.error('[ContactDrawer] submit failed:', err);
+        if (formView) formView.style.display = 'none';
+        if (errorView) errorView.style.display = 'block';
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Send it →';
+        }
+      }
+    });
+
+    console.log('[ContactDrawer] ready');
+  })();
+</script>

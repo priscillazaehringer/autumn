@@ -1,0 +1,281 @@
+---
+// =============================================
+// ON TOUR — upcoming events as concert tour dates
+// =============================================
+// Drop-in replacement for "Where to find me next."
+// Treats the events list like a band's tour poster:
+// big serif headline, double-rule frame, monospaced
+// city + serif venue name per row.
+// =============================================
+
+const props = Astro.props
+const events = props.events || []
+
+// Get current year for the subtitle
+const currentYear = new Date().getFullYear()
+
+// Format the day-of-week label for each event
+function getDayLabel(dateStr) {
+  if (!dateStr) return ''
+  const d = new Date(dateStr)
+  return d.toLocaleDateString('en-US', { weekday: 'long' })
+}
+
+// Re-format date as "APR 12" style (uppercase month, no leading zero on day)
+function getTourDate(dateStr) {
+  if (!dateStr) return ''
+  const d = new Date(dateStr)
+  const month = d.toLocaleDateString('en-US', { month: 'short' }).toUpperCase()
+  const day = d.getDate()
+  return `${month} ${day}`
+}
+
+// Pull the city out of "Mt. Vernon, IA" → "MT. VERNON, IA"
+// Falls back to the full string if no comma
+function getCityLine(location) {
+  if (!location) return ''
+  return location.toUpperCase()
+}
+
+// Stats for the bottom summary line
+const dateCount = events.length
+const stateSet = new Set()
+events.forEach((e) => {
+  const match = e.location?.match(/\b(IA|IL|MO|MN|WI|NE|KS|SD|ND|OH|IN|MI|KY|TN|Iowa|Illinois|Missouri|Minnesota|Wisconsin|Nebraska)\b/i)
+  if (match) stateSet.add(match[1].toUpperCase().slice(0, 2))
+})
+const stateCount = stateSet.size
+---
+
+<section class="bg-stone-100 border-y border-stone-200 py-24 md:py-32 on-tour">  <div class="max-w-3xl mx-auto px-6">
+
+    <!-- ===== Marquee header ===== -->
+    <div class="text-center mb-12 md:mb-16">
+      <p class="tour-stars">★    ★    ★</p>
+      <h2 class="tour-headline">On Tour</h2>
+      <p class="tour-subtitle">{currentYear} season</p>
+    </div>
+
+    <!-- ===== Tour date board =====
+         Top + bottom 2px black rules frame the dates
+         like a vintage concert poster. Each row is a
+         3-column grid: date / city + venue / link. -->
+    {events.length > 0 ? (
+      <div class="tour-board">
+        {events.map((event, i) => {
+          const isLast = i === events.length - 1
+          return (
+            <div class={`tour-row ${isLast ? 'tour-row-last' : ''}`}>
+              <div class="tour-date-col">
+                <p class="tour-date">{getTourDate(event.startDate || event.dateLabel)}</p>
+                {event.startDate && (
+                  <p class="tour-day">{getDayLabel(event.startDate)}</p>
+                )}
+              </div>
+
+              <div class="tour-event-col">
+                <p class="tour-city">{getCityLine(event.location)}</p>
+                <p class="tour-venue">{event.title}</p>
+              </div>
+
+              {event.url && (
+                <a href={event.url} target="_blank" rel="noopener noreferrer" class="tour-link">
+                  Details ↗
+                </a>
+              )}
+            </div>
+          )
+        })}
+      </div>
+    ) : (
+      <div class="tour-empty">
+        <p>No public dates booked at the moment.</p>
+        <p class="text-sm mt-3">
+          Want me at your festival? <a href="/contact" class="text-gold-700 underline underline-offset-4">Get in touch</a>.
+        </p>
+      </div>
+    )}
+
+    <!-- ===== Footer summary line =====
+         Small voice callback to the rain story.
+         "1 tarp" is intentional — it's a wink. -->
+    {events.length > 0 && (
+      <p class="tour-coda">
+        Booking inquiries always open · {dateCount} date{dateCount !== 1 ? 's' : ''}{stateCount > 0 ? ` · ${stateCount} state${stateCount !== 1 ? 's' : ''}` : ''} · 1 tarp
+      </p>
+    )}
+
+  </div>
+</section>
+
+<style>
+  /* ===== Tour poster header ===== */
+  .tour-stars {
+    font-size: 11px;
+    letter-spacing: 0.4em;
+    color: rgb(168 162 158); /* stone-400 */
+    margin-bottom: 1.25rem;
+    user-select: none;
+  }
+
+  .tour-headline {
+    font-family: 'Instrument Serif', serif;
+    font-weight: 400;
+    font-size: 4rem;
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+    color: rgb(28 25 23); /* stone-900 */
+    margin: 0;
+  }
+  @media (min-width: 768px) {
+    .tour-headline {
+      font-size: 5.5rem;
+    }
+  }
+
+  .tour-subtitle {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    font-size: 1.25rem;
+    color: rgb(180 132 25); /* gold-700 */
+    margin: 0.5rem 0 0;
+  }
+  @media (min-width: 768px) {
+    .tour-subtitle {
+      font-size: 1.5rem;
+    }
+  }
+
+  /* ===== The board itself ===== */
+  .tour-board {
+    border-top: 2px solid rgb(28 25 23);
+    border-bottom: 2px solid rgb(28 25 23);
+    padding: 0.5rem 0;
+  }
+
+  .tour-row {
+    display: grid;
+    grid-template-columns: 90px 1fr auto;
+    gap: 16px;
+    padding: 18px 8px;
+    align-items: baseline;
+    border-bottom: 0.5px solid rgba(28, 25, 23, 0.15);
+    transition: background-color 200ms;
+  }
+  @media (min-width: 768px) {
+    .tour-row {
+      grid-template-columns: 110px 1fr auto;
+      gap: 24px;
+      padding: 22px 16px;
+    }
+  }
+  .tour-row:hover {
+    background-color: rgba(254, 253, 249, 0.6);
+  }
+  .tour-row-last {
+    border-bottom: none;
+  }
+
+  /* Date column */
+  .tour-date {
+    font-family: 'Instrument Serif', serif;
+    font-size: 1.5rem;
+    font-weight: 400;
+    line-height: 1;
+    color: rgb(28 25 23);
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+  @media (min-width: 768px) {
+    .tour-date {
+      font-size: 1.875rem;
+    }
+  }
+
+  .tour-day {
+    font-size: 0.625rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: rgb(168 162 158); /* stone-400 */
+    margin: 6px 0 0;
+  }
+
+  /* Event column */
+  .tour-city {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+    color: rgb(28 25 23);
+    font-weight: 500;
+    margin: 0 0 6px;
+  }
+  @media (min-width: 768px) {
+    .tour-city {
+      font-size: 0.75rem;
+    }
+  }
+
+  .tour-venue {
+    font-family: 'Instrument Serif', serif;
+    font-size: 1.25rem;
+    line-height: 1.2;
+    color: rgb(28 25 23);
+    margin: 0;
+  }
+  @media (min-width: 768px) {
+    .tour-venue {
+      font-size: 1.5rem;
+    }
+  }
+
+  /* Link column */
+  .tour-link {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: rgb(180 132 25); /* gold-700 */
+    text-decoration: none;
+    border-bottom: 1px solid rgb(180 132 25);
+    padding-bottom: 2px;
+    align-self: baseline;
+    transition: color 200ms, border-color 200ms;
+    white-space: nowrap;
+  }
+  .tour-link:hover {
+    color: rgb(133 77 14); /* gold-900 */
+    border-color: rgb(133 77 14);
+  }
+  @media (min-width: 768px) {
+    .tour-link {
+      font-size: 0.75rem;
+    }
+  }
+
+  /* Empty state */
+  .tour-empty {
+    border-top: 2px solid rgb(28 25 23);
+    border-bottom: 2px solid rgb(28 25 23);
+    padding: 4rem 1rem;
+    text-align: center;
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    font-size: 1.125rem;
+    color: rgb(120 113 108);
+  }
+
+  /* Coda */
+  .tour-coda {
+    text-align: center;
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    font-size: 0.875rem;
+    color: rgb(120 113 108); /* stone-500 */
+    margin: 2rem 0 0;
+  }
+  @media (min-width: 768px) {
+    .tour-coda {
+      font-size: 1rem;
+    }
+  }
+</style>

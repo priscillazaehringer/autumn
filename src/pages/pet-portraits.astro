@@ -1,0 +1,297 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+import { sanityClient } from '../lib/sanity.js'
+
+// Pull upcoming portrait slots, only showing future-dated ones
+const todayISO = new Date().toISOString().split('T')[0]
+
+const slots = await sanityClient.fetch(
+  `*[_type == "portraitSlot" && status != "hidden" && shipDate >= $today] | order(shipDate asc) [0...8] {
+    _id,
+    shipDate,
+    status,
+    checkoutUrl
+  }`,
+  { today: todayISO }
+)
+
+// Format each slot for display
+const slotsForDisplay = slots.map((s) => {
+  const date = new Date(s.shipDate + 'T12:00:00') // noon avoids timezone day-shift
+  const monthShort = date.toLocaleDateString('en-US', { month: 'short' })
+  const day = date.getDate()
+  return {
+    id: s._id,
+    shipLabel: `Ships ${monthShort} ${day}`,
+    status: s.status,
+    checkoutUrl: s.checkoutUrl || '#',
+  }
+})
+
+const features = [
+  {
+    title: 'Hand-painted in oil',
+    body: 'No prints, no digital tricks. Each portrait is painted by hand on wrapped canvas.',
+  },
+  {
+    title: 'Hand-painted pet portraits.',
+    body: 'Painted from a photo you send. Whatever you have on your phone usually works.',
+  },
+  {
+    title: 'Ready to hang',
+    body: 'Wrapped canvas ships ready to display. No frame needed unless you want one.',
+  },
+]
+
+const galleryImages = [
+  { src: '/images/portraits/portrait-1.jpg', alt: 'Hand-painted oil portrait of a tabby cat' },
+  { src: '/images/portraits/portrait-2.jpg', alt: 'Hand-painted oil portrait of a golden retriever' },
+  { src: '/images/portraits/portrait-3.jpg', alt: 'Hand-painted oil portrait of a black cat' },
+  { src: '/images/portraits/portrait-4.jpg', alt: 'Hand-painted oil portrait of a small dog' },
+  { src: '/images/portraits/portrait-5.jpg', alt: 'Hand-painted oil portrait of a cat with markings' },
+  { src: '/images/portraits/portrait-6.jpg', alt: 'Hand-painted oil portrait of a brown dog' },
+]
+
+const steps = [
+  { num: '01', text: 'Pick a ship date below' },
+  { num: '02', text: 'Check out and pay $147' },
+  { num: '03', text: "I'll email you for your pet's photos and story" },
+  { num: '04', text: 'I paint your pet during the week before' },
+  { num: '05', text: 'Your portrait ships on the date you picked' },
+]
+
+const faqs = [
+  {
+    q: 'What kind of photo should I send?',
+    a: "After you book, I'll ask for 3 to 5 photos of your pet. Natural light works best. A mix is helpful: a full-body shot, a close-up of the face, and any photos that capture their personality. Phone photos are fine. I'll let you know if I need more.",
+  },
+  {
+    q: 'Can you paint more than one pet?',
+    a: 'Not on this size. The 5x7 canvas keeps each portrait detailed and personal, which means one animal per painting. If you have multiple pets, each one gets its own portrait.',
+  },
+  {
+    q: 'What size is the canvas?',
+    a: '5x7 inches on wrapped canvas. The wrapped edges mean it can hang as-is — no frame required, though it looks great in one if that\'s your vibe. About the size of a postcard.',
+  },
+  {
+    q: 'How long does it take?',
+    a: 'About a week. I paint your pet during the week leading up to your ship date, and your portrait goes in the mail by the date you picked.',
+  },
+  {
+    q: "What if I don't love it?",
+    a: "Each portrait is hand-painted just for you, so I don't offer refunds. But if something feels off when you receive it — wrong angle, missing detail, anything — let me know within 7 days and I'll do my best to make it right.",
+  },
+  {
+    q: 'Do you ship internationally?',
+    a: "Not yet. Right now portraits ship within the US. International shipping might come later, but if you're outside the US, get in touch and we'll see what's possible.",
+  },
+]
+---
+
+<BaseLayout title="Pet portraits — Autumn Z Art" description="Hand-painted oil pet portraits. One animal, one week, one painting at a time. $147.">
+
+  <!-- HERO -->
+  <section class="relative bg-gold-50 py-20 md:py-28 overflow-hidden">
+    <div class="max-w-6xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 items-center">
+      <div>
+        <p class="eyebrow-gold mb-6">Pet portraits</p>
+        <h1 class="h1-display mb-6 text-stone-900">
+          Hand-painted pet portraits.
+        </h1>
+        <p class="hero-lede mb-8 text-stone-700">
+          For the pet you love. $147 · Oil on canvas.
+        </p>
+        <a href="#pick-your-date" class="inline-block px-6 py-3.5 bg-stone-900 text-stone-50 rounded-md text-sm font-medium hover:bg-stone-800 transition">
+          Pick a ship date →
+        </a>
+      </div>
+      <div class="md:order-last order-first">
+        <div class="aspect-[4/5] overflow-hidden rounded-lg bg-stone-100 shadow-sm">
+          <img
+            src="/images/portraits/portrait-1.jpg"
+            alt="Hand-painted oil pet portrait on wrapped canvas"
+            class="w-full h-full object-cover"
+          />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHAT YOU GET -->
+  <section class="max-w-6xl mx-auto px-6 py-20 md:py-28">
+    <div class="text-center mb-12 md:mb-16">
+      <p class="text-xs uppercase tracking-[0.2em] text-stone-500 mb-4">What you get</p>
+         <h2 class="h2-section">
+        A real painting, made by hand.
+      </h2>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 max-w-4xl mx-auto">
+      {features.map((f) => (
+        <div class="text-center">
+                    <h3 class="h3-card mb-3">{f.title}</h3>
+          <p class="text-sm text-stone-600 leading-relaxed">{f.body}</p>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- GALLERY -->
+  <section class="bg-stone-100 py-20 md:py-28">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="text-center mb-12 md:mb-16">
+        <p class="text-xs uppercase tracking-[0.2em] text-stone-500 mb-4">Recent portraits</p>
+        <h2 class="font-serif text-3xl md:text-4xl font-normal leading-tight">
+          Some of the animals I've painted.
+        </h2>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+        {galleryImages.map((img) => (
+          <div class="aspect-[4/5] overflow-hidden rounded-lg bg-stone-200">
+            <img
+              src={img.src}
+              alt={img.alt}
+              class="w-full h-full object-cover hover:scale-105 transition duration-700"
+              loading="lazy"
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="max-w-6xl mx-auto px-6 py-20 md:py-28">
+    <div class="text-center mb-12 md:mb-16">
+      <p class="text-xs uppercase tracking-[0.2em] text-stone-500 mb-4">How it works</p>
+      <h2 class="font-serif text-3xl md:text-4xl font-normal leading-tight">
+        Five steps from photo to your door.
+      </h2>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-8 md:gap-6 max-w-5xl mx-auto">
+      {steps.map((s) => (
+        <div class="text-center md:text-left">
+          <p class="text-gold-700 font-serif text-3xl mb-3">{s.num}</p>
+          <p class="text-sm text-stone-700 leading-relaxed">{s.text}</p>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- PICK YOUR DATE -->
+  <section id="pick-your-date" class="bg-gold-50 py-24 md:py-32">
+    <div class="max-w-5xl mx-auto px-6">
+      <div class="text-center mb-12 md:mb-16">
+                <p class="eyebrow-gold mb-4">Booking</p>
+        <h2 class="font-serif text-4xl md:text-5xl font-normal leading-tight mb-4">
+          Pick a ship date.
+        </h2>
+        <p class="text-base text-stone-600 max-w-md mx-auto">
+          One pet, one painting per week. Pick the date your portrait arrives.
+        </p>
+      </div>
+
+      {slotsForDisplay.length > 0 ? (
+        <>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-10">
+            {slotsForDisplay.map((slot) => {
+              const isBooked = slot.status === 'booked'
+              return (
+                <div class={`rounded-lg p-6 transition ${isBooked ? 'bg-stone-100 border border-stone-200' : 'bg-stone-50 border border-stone-200 hover:border-stone-900'}`}>
+                  <p class={`text-xs uppercase tracking-wider mb-3 font-medium ${isBooked ? 'text-stone-400' : 'text-gold-700'}`}>
+                    {isBooked ? 'Booked' : 'Available'}
+                  </p>
+                  <p class={`font-serif text-xl mb-6 leading-tight ${isBooked ? 'text-stone-400' : 'text-stone-900'}`}>
+                    {slot.shipLabel}
+                  </p>
+                  {!isBooked ? (
+                    <a href={slot.checkoutUrl} class="inline-block w-full text-center px-4 py-2.5 bg-stone-900 text-stone-50 rounded-md text-sm font-medium hover:bg-stone-800 transition">
+                      Book this date
+                    </a>
+                  ) : (
+                    <p class="text-xs text-stone-400 text-center py-2.5">Not available</p>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+
+          <p class="text-center text-sm text-stone-600">
+            $147 per portrait. Includes shipping in the US.
+          </p>
+        </>
+      ) : (
+        <div class="text-center py-12">
+          <p class="font-serif text-2xl text-stone-700 mb-4">No upcoming dates available right now.</p>
+          <p class="text-base text-stone-600 mb-6 max-w-md mx-auto">
+            New ship dates open regularly. Get on the list and I'll email you when the next batch is bookable.
+          </p>
+          <a href="/contact" class="inline-block px-5 py-3 border border-stone-900 text-stone-900 rounded-md text-sm font-medium hover:bg-stone-900 hover:text-stone-50 transition">
+            Get notified →
+          </a>
+        </div>
+      )}
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="max-w-3xl mx-auto px-6 py-20 md:py-28">
+    <div class="text-center mb-12 md:mb-16">
+      <p class="text-xs uppercase tracking-[0.2em] text-stone-500 mb-4">Questions</p>
+      <h2 class="font-serif text-3xl md:text-4xl font-normal leading-tight">
+        Things people often ask.
+      </h2>
+    </div>
+    <div class="divide-y divide-stone-200 border-t border-b border-stone-200">
+      {faqs.map((faq) => (
+        <details class="group py-5">
+          <summary class="flex items-center justify-between cursor-pointer list-none">
+            <h3 class="font-serif text-lg text-stone-900 pr-6">{faq.q}</h3>
+            <span class="text-stone-400 group-open:rotate-45 transition-transform duration-200 text-2xl leading-none flex-shrink-0">+</span>
+          </summary>
+          <p class="text-sm text-stone-600 leading-relaxed mt-4 pr-10">{faq.a}</p>
+        </details>
+      ))}
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="bg-stone-100 py-20 md:py-28">
+    <div class="max-w-5xl mx-auto px-6 grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-16 items-center">
+      <div class="md:col-span-5">
+        <div class="aspect-[4/5] overflow-hidden rounded-lg bg-stone-200">
+          <img
+            src="/images/Autumn-Zaehringer-scaled.jpg"
+            alt="Autumn Zaehringer"
+            class="w-full h-full object-cover"
+            style="object-position: center 30%;"
+          />
+        </div>
+      </div>
+      <div class="md:col-span-7">
+        <p class="text-xs uppercase tracking-[0.2em] text-stone-500 mb-4">About the artist</p>
+        <h2 class="font-serif text-3xl md:text-4xl font-normal leading-tight mb-6">
+          Hi, I'm Autumn.
+        </h2>
+        <p class="text-base text-stone-700 leading-relaxed mb-4">
+          Placeholder paragraph in Autumn's voice.
+        </p>
+        <p class="text-base text-stone-700 leading-relaxed">
+          Placeholder second paragraph.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FINAL CTA -->
+  <section class="bg-gold-50 py-24 md:py-32">
+    <div class="max-w-2xl mx-auto px-6 text-center">
+      <h2 class="font-serif text-3xl md:text-4xl font-normal leading-snug mb-8">
+        Slots fill up. If you've been thinking about it,<br class="hidden md:block"/> this is your sign.
+      </h2>
+      <a href="#pick-your-date" class="inline-block px-6 py-3.5 bg-stone-900 text-stone-50 rounded-md text-sm font-medium hover:bg-stone-800 transition">
+        Pick a ship date →
+      </a>
+    </div>
+  </section>
+
+</BaseLayout>

@@ -1,0 +1,18 @@
+---
+interface Props {
+  number?: string
+  eyebrow: string
+  heading: string
+  size?: 'default' | 'large'
+}
+
+const { number, eyebrow, heading, size = 'default' } = Astro.props as Props
+const headingSize = size === 'large' ? 'text-5xl md:text-6xl' : 'text-4xl md:text-5xl'
+---
+
+<div class="mb-12">
+  <p class="text-xs uppercase tracking-[0.2em] text-stone-500 mb-6">
+    {number ? `— ${number} · ${eyebrow}` : `— ${eyebrow}`}
+  </p>
+  <h2 class={`font-serif ${headingSize} font-normal leading-tight`}>{heading}</h2>
+</div>

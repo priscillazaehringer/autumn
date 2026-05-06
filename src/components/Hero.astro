@@ -1,0 +1,82 @@
+---
+import Button from './Button.astro'
+
+interface CtaProps {
+  label: string
+  href: string
+}
+
+interface Props {
+  eyebrow?: string
+  eyebrowPrefix?: string
+  heading: string
+  subheading?: string
+  primaryCta?: CtaProps
+  secondaryCta?: CtaProps
+  size?: 'default' | 'xl'
+  fullHeight?: boolean
+  allowHtmlHeading?: boolean
+}
+
+const {
+  eyebrow,
+  eyebrowPrefix,
+  heading,
+  subheading,
+  primaryCta,
+  secondaryCta,
+  size = 'default',
+  fullHeight = false,
+  allowHtmlHeading = false,
+} = Astro.props as Props
+
+const headingClasses = size === 'xl'
+  ? 'text-6xl md:text-8xl leading-[0.95] tracking-tight'
+  : 'text-5xl md:text-7xl leading-tight tracking-tight'
+
+const sectionClasses = [
+  'max-w-5xl mx-auto px-6',
+  fullHeight
+    ? 'min-h-[80vh] flex flex-col justify-center py-20'
+    : 'pt-32 pb-20',
+].join(' ')
+
+const headingId = 'hero-heading'
+---
+
+<section class={sectionClasses} aria-labelledby={headingId}>
+  {eyebrow && (
+    <p class="text-xs uppercase tracking-[0.2em] text-stone-500 mb-6">
+      {eyebrowPrefix && <span aria-hidden="true">{eyebrowPrefix} </span>}
+      {eyebrow}
+    </p>
+  )}
+
+  {allowHtmlHeading ? (
+    <h1
+      id={headingId}
+      class={`font-serif ${headingClasses} font-light mb-8`}
+      set:html={heading}
+    />
+  ) : (
+    <h1
+      id={headingId}
+      class={`font-serif ${headingClasses} font-light mb-8`}
+    >
+      {heading}
+    </h1>
+  )}
+
+  {subheading && (
+    <p class="text-xl md:text-2xl text-stone-700 max-w-2xl leading-snug font-light mb-10">
+      {subheading}
+    </p>
+  )}
+
+  {(primaryCta || secondaryCta) && (
+    <div class="flex flex-wrap gap-3">
+      {primaryCta && <Button {...primaryCta} variant="primary" />}
+      {secondaryCta && <Button {...secondaryCta} variant="secondary" />}
+    </div>
+  )}
+</section>

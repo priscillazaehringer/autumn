@@ -1,0 +1,86 @@
+@import "tailwindcss";
+
+@theme {
+  --color-gold-50: #faf6ec;
+  --color-gold-100: #f3ead0;
+  --color-gold-200: #e6d4a3;
+  --color-gold-300: #d8bd75;
+  --color-gold-400: #cda85d;
+  --color-gold-500: #c89c5a;
+  --color-gold-600: #a87f44;
+  --color-gold-700: #866334;
+  --color-gold-800: #65492a;
+  --color-gold-900: #4a361f;
+}
+
+/* ---------- TYPOGRAPHY SYSTEM ---------- */
+/* Used across every page. Edit here, propagates everywhere. */
+
+@layer components {
+
+  /* Eyebrow — small uppercase label above section/page titles.
+     Default is stone; .eyebrow-gold is the warm variant. */
+  .eyebrow {
+    @apply text-xs uppercase tracking-[0.2em] text-stone-500 font-medium;
+  }
+  .eyebrow-gold {
+    @apply text-xs uppercase tracking-[0.2em] text-gold-700 font-medium;
+  }
+  /* Use .eyebrow-light on dark hero backgrounds (video/photo overlays). */
+  .eyebrow-light {
+    @apply text-xs uppercase tracking-[0.2em] text-stone-300 font-medium;
+  }
+
+  /* H1 — hero title, one per page. */
+  .h1-display {
+    @apply font-serif font-normal tracking-tight;
+    @apply text-5xl sm:text-6xl md:text-8xl;
+    @apply leading-[0.95];
+  }
+
+  /* H2 — section title. */
+  .h2-section {
+    @apply font-serif font-normal leading-tight tracking-tight;
+    @apply text-4xl md:text-5xl;
+  }
+
+  /* H3 — card / award / sub-section title. */
+  .h3-card {
+    @apply font-serif font-normal leading-tight;
+    @apply text-2xl;
+  }
+
+  /* Hero subhead — sits directly under .h1-display. */
+  .hero-lede {
+    @apply text-lg md:text-2xl text-stone-600 font-light leading-snug max-w-2xl;
+  }
+  /* On dark hero backgrounds (video/image overlay) add `text-stone-200` to the
+     element to override the default stone-600. */
+
+  /* Body prose — for long-form paragraphs. */
+  .body-prose {
+    @apply text-base md:text-lg text-stone-700 leading-relaxed;
+  }
+
+  /* Caption — small meta line under images, in galleries, etc. */
+  .caption {
+    @apply text-xs uppercase tracking-widest text-stone-500;
+  }
+}
+.note-date {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: rgb(168 162 158);
+  font-family: 'Inter', sans-serif;
+}
+
+.note-body p {
+  font-size: 1.125rem;
+  line-height: 1.75;
+  color: rgb(41 37 36);
+}
+
+.note-body em {
+  color: rgb(87 83 78);
+}

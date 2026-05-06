@@ -1,0 +1,454 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+import { sanityClient, urlFor } from '../lib/sanity.js'
+
+// ---------- DATA ----------
+const projects = await sanityClient.fetch(
+  `*[_type == "project"] | order(year desc, _createdAt desc) {
+    _id,
+    title,
+    medium,
+    year,
+    location,
+    festival,
+    placement,
+    description,
+    heroImage,
+    gallery,
+    "slug": slug.current
+  }`
+)
+
+const mediumLabels = {
+  chalk: 'Chalk art',
+  window: 'Window design',
+  mural: 'Mural',
+  portrait: 'Pet portrait',
+  other: 'Other',
+}
+
+// Shape projects for the grid + lightbox.
+const projectsForDisplay = projects.map((p) => ({
+  id: p._id,
+  title: p.title,
+  medium: p.medium,
+  mediumLabel: mediumLabels[p.medium] || p.medium,
+  year: p.year,
+  location: p.location || null,
+  festival: p.festival || null,
+  placement: p.placement || null,
+  description: p.description || null,
+  locationSuffix: p.location ? ' · ' + p.location : '',
+  // Grid card image — 4:5 portrait crop.
+  thumbUrl: p.heroImage ? urlFor(p.heroImage).width(900).height(1125).fit('crop').url() : null,
+  // Lightbox hero — wide landscape.
+  heroUrl: p.heroImage ? urlFor(p.heroImage).width(1600).height(1000).fit('crop').url() : null,
+  gallery: (p.gallery || []).map((img) => ({
+    full: urlFor(img).width(1600).url(),
+    thumb: urlFor(img).width(600).height(600).fit('crop').url(),
+  })),
+}))
+
+// ---------- FILTER OPTIONS (auto-derived) ----------
+const mediumsInUse = [...new Set(projects.map((p) => p.medium))]
+const mediumFilters = [
+  { value: 'all', label: 'All work' },
+  ...mediumsInUse.map((m) => ({ value: m, label: mediumLabels[m] || m })),
+]
+
+const yearsInUse = [...new Set(projects.map((p) => p.year))].sort((a, b) => b - a)
+const yearFilters = [
+  { value: 'all', label: 'All years' },
+  ...yearsInUse.map((y) => ({ value: String(y), label: String(y) })),
+]
+
+const projectCount = projects.length
+---
+
+<BaseLayout title="Work — Autumn Z Art" description="Chalk art, window designs, murals, and pet portraits by Autumn Zaehringer.">
+
+  <!-- HERO -->
+  <section class="max-w-6xl mx-auto px-6 pt-24 pb-16">
+    <p class="eyebrow mb-6">Portfolio</p>
+    <h1 class="h1-display mb-6 max-w-4xl">
+      Some of what I've<br/>been working on.
+    </h1>
+    <p class="hero-lede">
+      Portraits, murals, and festival chalk since 2017.
+    </p>
+  </section>
+
+  <!-- FILTER BAR + GRID -->
+  <section class="max-w-6xl mx-auto px-6 pb-24">
+
+    <!-- CONDENSED FILTER BAR -->
+    <div class="border-y border-stone-200 py-4 mb-12">
+      <div class="flex flex-wrap items-center gap-x-8 gap-y-3">
+
+        <!-- Medium chips -->
+        <div class="flex flex-wrap items-center gap-x-6 gap-y-2">
+          {mediumFilters.map((f) => (
+            <button
+              data-filter-type="medium"
+              data-filter-value={f.value}
+              data-active={f.value === 'all' ? 'true' : 'false'}
+              class="filter-chip text-sm pb-1 border-b transition border-transparent text-stone-500 hover:text-stone-900 data-[active=true]:border-gold-500 data-[active=true]:text-stone-900 data-[active=true]:font-medium"
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+
+        <!-- Right cluster: year dropdown + count -->
+        <div class="ml-auto flex items-center gap-6">
+
+          <!-- Year dropdown -->
+          <div class="relative" id="year-dropdown">
+            <button
+              id="year-dropdown-trigger"
+              type="button"
+              aria-haspopup="true"
+              aria-expanded="false"
+              class="text-sm text-stone-700 hover:text-stone-900 flex items-center gap-1.5 pb-1 border-b border-stone-300 hover:border-stone-900 transition"
+            >
+              <span class="text-[10px] uppercase tracking-[0.2em] text-stone-400">Year</span>
+              <span id="year-dropdown-label" class="font-medium">All</span>
+              <svg width="10" height="10" viewBox="0 0 10 10" id="year-dropdown-caret" class="transition-transform">
+                <path d="M2 4l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </button>
+            <div
+              id="year-dropdown-menu"
+              class="hidden absolute right-0 top-full mt-2 bg-stone-50 border border-stone-200 rounded-md shadow-lg py-1 min-w-[100px] z-30"
+            >
+              {yearFilters.map((y) => (
+                <button
+                  type="button"
+                  data-filter-type="year"
+                  data-filter-value={y.value}
+                  data-active={y.value === 'all' ? 'true' : 'false'}
+                  class="year-option w-full text-left px-4 py-1.5 text-sm hover:bg-stone-100 transition text-stone-700 data-[active=true]:text-gold-600 data-[active=true]:font-medium"
+                >
+                  {y.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <!-- Count + clear -->
+          <div class="text-xs text-stone-500 tabular-nums whitespace-nowrap">
+            <span id="count-summary"><span class="text-stone-900 font-medium">{projectCount}</span> {projectCount === 1 ? 'project' : 'projects'}</span>
+            <button
+              id="clear-filters"
+              class="hidden ml-3 text-gold-600 hover:text-gold-700 underline underline-offset-4 transition"
+            >
+              Clear
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- UNIFORM 3-UP GRID — every card 4:5 portrait, hover overlay reveals meta. -->
+    <div id="gallery" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+      {projectsForDisplay.map((p) => (
+        <button
+          type="button"
+          class="project-card group relative block w-full overflow-hidden bg-stone-100 rounded-md text-left aspect-[4/5]"
+          data-medium={p.medium}
+          data-year={p.year}
+          data-project-id={p.id}
+        >
+          {p.thumbUrl ? (
+            <img
+              src={p.thumbUrl}
+              alt={p.title}
+              class="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.03] transition duration-700"
+              loading="lazy"
+            />
+          ) : (
+            <div class="absolute inset-0 stripe-placeholder flex items-end p-4">
+              <p class="text-[10px] uppercase tracking-[0.2em] text-stone-500 font-mono">{p.mediumLabel} · {p.year}</p>
+            </div>
+          )}
+
+          <div class="card-meta">
+            <p class="text-xs uppercase tracking-[0.2em] text-stone-300 mb-1">{p.mediumLabel} · {p.year}{p.locationSuffix}</p>
+            <h3 class="font-serif text-xl md:text-2xl text-stone-50 leading-tight">{p.title}</h3>
+            {p.placement && <p class="text-sm text-gold-300 mt-1.5 font-medium">{p.placement}</p>}
+          </div>
+        </button>
+      ))}
+    </div>
+
+    <p id="empty-state" class="hidden text-stone-500 text-center py-24">
+      No projects match these filters. <span class="block text-sm mt-2 text-stone-400">Try a different combination.</span>
+    </p>
+
+  </section>
+
+  <!-- LIGHTBOX -->
+  <div
+    id="lightbox"
+    class="hidden fixed inset-0 z-[60] bg-stone-900/90 backdrop-blur-sm items-center justify-center p-4 md:p-12"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="lightbox-title"
+  >
+    <div id="lightbox-card" class="bg-stone-50 rounded-md max-w-5xl w-full max-h-[90vh] overflow-y-auto relative">
+      <button
+        id="lightbox-close"
+        type="button"
+        aria-label="Close"
+        class="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-stone-50/90 border border-stone-200 flex items-center justify-center text-stone-700 hover:bg-stone-900 hover:text-stone-50 hover:border-stone-900 transition"
+      >
+        <svg width="14" height="14" viewBox="0 0 14 14"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" /></svg>
+      </button>
+
+      <div id="lightbox-hero" class="aspect-[16/10] bg-stone-100"></div>
+
+      <div class="p-6 md:p-10">
+        <p id="lightbox-eyebrow" class="text-xs uppercase tracking-[0.2em] text-gold-600 font-medium mb-3"></p>
+        <h2 id="lightbox-title" class="font-serif text-3xl md:text-5xl leading-[1.05] tracking-tight mb-6 font-normal"></h2>
+
+        <dl id="lightbox-meta" class="grid grid-cols-2 md:grid-cols-4 gap-6 pb-8 mb-8 border-b border-stone-200 text-sm"></dl>
+
+        <p id="lightbox-description" class="hidden text-base text-stone-700 leading-relaxed mb-10 max-w-2xl"></p>
+
+        <div id="lightbox-gallery-section" class="hidden">
+          <p class="text-xs uppercase tracking-[0.2em] text-stone-400 mb-3">More views</p>
+          <div id="lightbox-gallery" class="grid grid-cols-3 gap-3"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</BaseLayout>
+
+<script is:inline define:vars={{ projectsForDisplay }}>
+  // ---------- DATA ----------
+  const PROJECTS = projectsForDisplay
+  const projectsById = Object.fromEntries(PROJECTS.map(p => [p.id, p]))
+
+  // ---------- FILTER STATE ----------
+  const activeFilters = { medium: 'all', year: 'all' }
+
+  const params = new URLSearchParams(window.location.search)
+  if (params.get('medium')) activeFilters.medium = params.get('medium')
+  if (params.get('year'))   activeFilters.year   = params.get('year')
+
+  function writeUrl() {
+    const p = new URLSearchParams()
+    if (activeFilters.medium !== 'all') p.set('medium', activeFilters.medium)
+    if (activeFilters.year   !== 'all') p.set('year', activeFilters.year)
+    const qs = p.toString()
+    const url = qs ? window.location.pathname + '?' + qs : window.location.pathname
+    window.history.replaceState({}, '', url)
+  }
+
+  function setActiveChip(type, value) {
+    document.querySelectorAll(`[data-filter-type="${type}"]`).forEach((el) => {
+      el.setAttribute('data-active', el.getAttribute('data-filter-value') === value ? 'true' : 'false')
+    })
+  }
+
+  function applyFilters() {
+    const cards = document.querySelectorAll('.project-card')
+    let visible = 0
+    cards.forEach((card) => {
+      const m = card.getAttribute('data-medium')
+      const y = card.getAttribute('data-year')
+      const ok = (activeFilters.medium === 'all' || m === activeFilters.medium)
+              && (activeFilters.year   === 'all' || y === activeFilters.year)
+      card.style.display = ok ? '' : 'none'
+      if (ok) visible++
+    })
+
+    const gallery = document.getElementById('gallery')
+    const empty = document.getElementById('empty-state')
+    if (visible === 0) {
+      gallery.classList.add('hidden')
+      empty.classList.remove('hidden')
+    } else {
+      gallery.classList.remove('hidden')
+      empty.classList.add('hidden')
+    }
+
+    document.getElementById('year-dropdown-label').textContent =
+      activeFilters.year === 'all' ? 'All' : activeFilters.year
+
+    const total = PROJECTS.length
+    const hasFilter = activeFilters.medium !== 'all' || activeFilters.year !== 'all'
+    const summary = document.getElementById('count-summary')
+    const clearBtn = document.getElementById('clear-filters')
+    if (hasFilter) {
+      summary.innerHTML = `<span class="text-stone-900 font-medium">${visible}</span> of ${total}`
+      clearBtn.classList.remove('hidden')
+    } else {
+      summary.innerHTML = `<span class="text-stone-900 font-medium">${total}</span> ${total === 1 ? 'project' : 'projects'}`
+      clearBtn.classList.add('hidden')
+    }
+  }
+
+  setActiveChip('medium', activeFilters.medium)
+  setActiveChip('year', activeFilters.year)
+  applyFilters()
+
+  // ---------- MEDIUM CHIPS ----------
+  document.querySelectorAll('[data-filter-type="medium"]').forEach((chip) => {
+    chip.addEventListener('click', () => {
+      activeFilters.medium = chip.getAttribute('data-filter-value')
+      setActiveChip('medium', activeFilters.medium)
+      applyFilters()
+      writeUrl()
+    })
+  })
+
+  // ---------- YEAR DROPDOWN ----------
+  const yearTrigger = document.getElementById('year-dropdown-trigger')
+  const yearMenu = document.getElementById('year-dropdown-menu')
+  const yearCaret = document.getElementById('year-dropdown-caret')
+  const yearDropdown = document.getElementById('year-dropdown')
+
+  function setYearMenuOpen(open) {
+    if (open) {
+      yearMenu.classList.remove('hidden')
+      yearTrigger.setAttribute('aria-expanded', 'true')
+      yearCaret.classList.add('rotate-180')
+    } else {
+      yearMenu.classList.add('hidden')
+      yearTrigger.setAttribute('aria-expanded', 'false')
+      yearCaret.classList.remove('rotate-180')
+    }
+  }
+  yearTrigger.addEventListener('click', (e) => {
+    e.stopPropagation()
+    setYearMenuOpen(yearMenu.classList.contains('hidden'))
+  })
+  document.addEventListener('click', (e) => {
+    if (!yearDropdown.contains(e.target)) setYearMenuOpen(false)
+  })
+  document.querySelectorAll('.year-option').forEach((opt) => {
+    opt.addEventListener('click', () => {
+      activeFilters.year = opt.getAttribute('data-filter-value')
+      setActiveChip('year', activeFilters.year)
+      setYearMenuOpen(false)
+      applyFilters()
+      writeUrl()
+    })
+  })
+
+  // ---------- CLEAR ----------
+  document.getElementById('clear-filters').addEventListener('click', () => {
+    activeFilters.medium = 'all'
+    activeFilters.year = 'all'
+    setActiveChip('medium', 'all')
+    setActiveChip('year', 'all')
+    applyFilters()
+    writeUrl()
+  })
+
+  // ---------- LIGHTBOX ----------
+  const lightbox = document.getElementById('lightbox')
+  const lightboxCard = document.getElementById('lightbox-card')
+  const lightboxHero = document.getElementById('lightbox-hero')
+  const lightboxEyebrow = document.getElementById('lightbox-eyebrow')
+  const lightboxTitle = document.getElementById('lightbox-title')
+  const lightboxMeta = document.getElementById('lightbox-meta')
+  const lightboxDescription = document.getElementById('lightbox-description')
+  const lightboxGallerySection = document.getElementById('lightbox-gallery-section')
+  const lightboxGallery = document.getElementById('lightbox-gallery')
+
+  function openLightbox(id) {
+    const p = projectsById[id]
+    if (!p) return
+
+    lightboxHero.innerHTML = ''
+    lightboxHero.classList.remove('stripe-placeholder')
+    if (p.heroUrl) {
+      const img = document.createElement('img')
+      img.src = p.heroUrl
+      img.alt = p.title
+      img.className = 'w-full h-full object-cover'
+      lightboxHero.appendChild(img)
+    } else {
+      lightboxHero.classList.add('stripe-placeholder')
+    }
+
+    lightboxEyebrow.textContent = p.mediumLabel
+    lightboxTitle.textContent = p.title
+
+    const metaItems = [
+      { label: 'Year', value: p.year, gold: false },
+      p.location && { label: 'Location', value: p.location, gold: false },
+      p.festival && { label: 'Festival', value: p.festival, gold: false },
+      p.placement && { label: 'Placement', value: p.placement, gold: true },
+    ].filter(Boolean)
+
+    lightboxMeta.innerHTML = metaItems.map(m => `
+      <div>
+        <dt class="text-[10px] uppercase tracking-[0.2em] text-stone-400 mb-1">${m.label}</dt>
+        <dd class="${m.gold ? 'text-gold-600 font-medium' : 'text-stone-700'}">${m.value}</dd>
+      </div>
+    `).join('')
+
+    if (p.description) {
+      lightboxDescription.textContent = p.description
+      lightboxDescription.classList.remove('hidden')
+    } else {
+      lightboxDescription.classList.add('hidden')
+    }
+
+    if (p.gallery && p.gallery.length > 0) {
+      lightboxGallery.innerHTML = p.gallery.map(img => `
+        <a href="${img.full}" target="_blank" rel="noopener" class="block aspect-square overflow-hidden bg-stone-100 rounded-sm group">
+          <img src="${img.thumb}" alt="" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" loading="lazy" />
+        </a>
+      `).join('')
+      lightboxGallerySection.classList.remove('hidden')
+    } else {
+      lightboxGallerySection.classList.add('hidden')
+    }
+
+    lightbox.classList.remove('hidden')
+    lightbox.classList.add('flex')
+    document.body.style.overflow = 'hidden'
+    lightboxCard.scrollTop = 0
+  }
+
+  function closeLightbox() {
+    lightbox.classList.add('hidden')
+    lightbox.classList.remove('flex')
+    document.body.style.overflow = ''
+  }
+
+  document.querySelectorAll('.project-card').forEach((card) => {
+    card.addEventListener('click', () => openLightbox(card.getAttribute('data-project-id')))
+  })
+
+  document.getElementById('lightbox-close').addEventListener('click', closeLightbox)
+  lightbox.addEventListener('click', (e) => {
+    if (e.target === lightbox) closeLightbox()
+  })
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !lightbox.classList.contains('hidden')) closeLightbox()
+  })
+</script>
+
+<style>
+  .stripe-placeholder {
+    background-image: repeating-linear-gradient(135deg, rgba(28,25,23,0.04) 0 14px, rgba(28,25,23,0.08) 14px 28px);
+  }
+  /* Card hover overlay. */
+  .card-meta {
+    position: absolute;
+    inset: auto 0 0 0;
+    padding: 1.25rem 1.5rem;
+    background: linear-gradient(to top, rgba(28,25,23,0.92), rgba(28,25,23,0.4) 60%, transparent);
+    transform: translateY(0.5rem);
+    opacity: 0;
+    transition: transform 500ms cubic-bezier(0.22,1,0.36,1), opacity 500ms cubic-bezier(0.22,1,0.36,1);
+  }
+  .project-card:hover .card-meta { transform: translateY(0); opacity: 1; }
+</style>

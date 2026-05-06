@@ -1,0 +1,176 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import { sanityClient, urlFor } from '../../lib/sanity.js'
+import { PortableText } from 'astro-portabletext'
+
+export async function getStaticPaths() {
+  const notes = await sanityClient.fetch(`
+    *[_type == "note"]{
+      "slug": slug.current,
+      title,
+      publishedAt,
+      excerpt,
+      coverImage,
+      body,
+      instagramSource
+    }
+  `)
+  return notes.map((note) => ({
+    params: { slug: note.slug },
+    props: { note },
+  }))
+}
+
+const { note } = Astro.props
+
+const formatDate = (iso) => {
+  const d = new Date(iso)
+  return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+}
+
+const coverImageUrl = note.coverImage
+  ? urlFor(note.coverImage).width(1600).fit('max').url()
+  : null
+---
+
+<BaseLayout title={`${note.title} — Autumn Z Art`} description={note.excerpt}>
+
+  <article class="max-w-2xl mx-auto px-6 pt-16 md:pt-24 pb-24 md:pb-32">
+
+    <a href="/notes" class="text-sm text-stone-500 hover:text-stone-900 transition mb-12 inline-block">
+      ← All notes
+    </a>
+
+    <header class="mb-12">
+      <p class="text-xs uppercase tracking-widest text-stone-400 mb-4">{formatDate(note.publishedAt)}</p>
+      <h1 class="font-serif text-4xl md:text-5xl text-stone-900 leading-tight tracking-tight">
+        {note.title}
+      </h1>
+    </header>
+
+    {coverImageUrl && (
+      <figure class="mb-12 -mx-6 md:mx-0">
+        <img src={coverImageUrl} alt={note.coverImage.alt || note.title} class="w-full h-auto md:rounded-md" />
+      </figure>
+    )}
+
+    <div class="note-body body-prose space-y-6">
+      <PortableText value={note.body} />
+    </div>
+
+    {note.instagramSource && note.instagramSource.url && (
+      
+        <a href={note.instagramSource.url}
+        target="_blank"
+        rel="noopener"
+        class="ig-source-card"
+      >
+        <div class="ig-source-icon">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="2" width="20" height="20" rx="5" ry="5" fill="none" stroke="currentColor" stroke-width="2"/>
+            <circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/>
+            <circle cx="17.5" cy="6.5" r="1.5" fill="currentColor"/>
+          </svg>
+        </div>
+        <div class="ig-source-text">
+          <p class="ig-source-eyebrow">First seen on Instagram</p>
+          <p class="ig-source-cta">View the original post <span class="ig-source-arrow">→</span></p>
+        </div>
+      </a>
+    )}
+
+    <div class="mt-20 pt-12 border-t border-stone-200">
+      <p class="font-serif text-2xl text-stone-900 mb-4">
+        Got something in mind?
+      </p>
+      <p class="text-stone-600 mb-8 leading-relaxed">
+        I'm currently booking festivals, windows, and pet portraits for 2026 and 2027.
+      </p>
+      <button
+  type="button"
+  data-inquire=""
+  class="inline-block px-6 py-3 bg-stone-900 text-stone-50 rounded-md text-sm font-medium hover:bg-stone-800 transition cursor-pointer border-0"
+>
+  Start the conversation →
+</button>
+
+  </article>
+
+</BaseLayout>
+
+<style>
+  .note-body :global(p) {
+    font-size: 1.125rem;
+    line-height: 1.75;
+    color: rgb(41 37 36);
+  }
+
+  .note-body :global(h2) {
+    font-family: 'Instrument Serif', serif;
+    font-size: 1.875rem;
+    line-height: 1.2;
+    color: rgb(28 25 23);
+    margin-top: 2.5rem;
+    margin-bottom: 1rem;
+    letter-spacing: -0.015em;
+  }
+
+  .note-body :global(h3) {
+    font-family: 'Instrument Serif', serif;
+    font-size: 1.5rem;
+    line-height: 1.25;
+    color: rgb(28 25 23);
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .note-body :global(blockquote) {
+    border-left: 3px solid rgb(202 138 4);
+    padding-left: 1.25rem;
+    margin: 2rem 0;
+    font-family: 'Instrument Serif', serif;
+    font-size: 1.25rem;
+    font-style: italic;
+    color: rgb(87 83 78);
+  }
+
+  .note-body :global(em) {
+    color: rgb(87 83 78);
+  }
+
+  .note-body :global(strong) {
+    color: rgb(28 25 23);
+    font-weight: 600;
+  }
+
+  .note-body :global(a) {
+    color: rgb(180 132 25);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+
+  .note-body :global(a:hover) {
+    color: rgb(146 105 19);
+  }
+
+  .note-body :global(img) {
+    width: 100%;
+    height: auto;
+    border-radius: 4px;
+    margin: 2rem 0;
+  }
+
+  .ig-source-card {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 20px 24px;
+    margin-top: 3rem;
+    background: #fefdf9;
+    border: 1px solid rgb(231 229 228);
+    border-radius: 8px;
+    text-decoration: none;
+    transition: transform 350ms cubic-bezier(0.22, 1, 0.36, 1), border-color 250ms, box-shadow 350ms;
+  }
+
+  .ig-source-card:
