@@ -2,15 +2,15 @@
 import BaseLayout from '../layouts/BaseLayout.astro'
 import FinalCTA from '../components/FinalCTA.astro'
 import { sanityClient, urlFor } from '../lib/sanity.js'
+import { siteConfig } from '../site.config.js'
 
-// Pull one featured image per medium from Sanity (same pattern as the homepage).
+const services = siteConfig.services
+
+// Pull one featured image per medium from Sanity, keyed by each service's mediumKey.
+const mediumKeys = [...new Set(services.map((s) => s.mediumKey))]
 const featuredByMedium = await sanityClient.fetch(
   `{
-    "chalk":    *[_type == "project" && medium == "chalk"    && defined(heroImage)] | order(featured desc, year desc, _createdAt desc)[0]{ heroImage, title },
-    "window":   *[_type == "project" && medium == "window"   && defined(heroImage)] | order(featured desc, year desc, _createdAt desc)[0]{ heroImage, title },
-    "portrait": *[_type == "project" && medium == "portrait" && defined(heroImage)] | order(featured desc, year desc, _createdAt desc)[0]{ heroImage, title },
-    "mural":    *[_type == "project" && medium == "mural"    && defined(heroImage)] | order(featured desc, year desc, _createdAt desc)[0]{ heroImage, title },
-    "other":    *[_type == "project" && medium == "other"    && defined(heroImage)] | order(featured desc, year desc, _createdAt desc)[0]{ heroImage, title }
+    ${mediumKeys.map((k) => `"${k}": *[_type == "project" && medium == "${k}" && defined(heroImage)] | order(featured desc, year desc, _createdAt desc)[0]{ heroImage, title }`).join(',\n    ')}
   }`
 )
 
@@ -30,78 +30,16 @@ for (const t of allTestimonials) {
   }
 }
 
-// Service definitions, in popularity order: chalk, windows, portraits, murals, custom.
-// Note: there's no `href` field anymore — each service row is a div, not a link.
-// The "Inquire about [service]" button uses data-inquire to open the contact drawer.
-const services = [
-  {
-    slug: 'chalk',
-    label: 'Chalk',
-    tagline: 'Pavement, festivals, a single weekend.',
-    voice: 'Festival commissions, brand activations, public art weekends. Designed for photography, with the work washing away in the next rain.',
-    surface: 'Pavement, sidewalk, walls',
-    leadTime: '4–6 weeks',
-    priceRange: 'By scope',
-    image: featuredByMedium.chalk?.heroImage,
-    altTitle: featuredByMedium.chalk?.title,
-    placeholder: 'Chalk · festival commission',
-  },
-  {
-    slug: 'windows',
-    label: 'Windows',
-    tagline: 'Live painted on glass.',
-    voice: 'Holiday windows, grand openings, anything seasonal. The work goes up on-site and comes off cleanly once the season ends.',
-    surface: 'Storefront glass',
-    leadTime: '2–3 weeks',
-    priceRange: 'By scope',
-    image: featuredByMedium.window?.heroImage,
-    altTitle: featuredByMedium.window?.title,
-    placeholder: 'Window · holiday storefront',
-  },
-  {
-    slug: 'portraits',
-    label: 'Pet portraits',
-    tagline: 'Hand-painted oil. One animal per canvas.',
-    voice: 'Painted from a photo on a 5×7 wrapped canvas. Booked through a calendar of weekly ship dates.',
-    surface: '5×7 wrapped canvas',
-    leadTime: 'Picks a ship date',
-    priceRange: '$147 flat',
-    image: featuredByMedium.portrait?.heroImage,
-    altTitle: featuredByMedium.portrait?.title,
-    placeholder: 'Pet portrait · 5×7 oil on canvas',
-  },
-  {
-    slug: 'murals',
-    label: 'Murals',
-    tagline: 'Permanent work, public-facing.',
-    voice: 'Interior or exterior, hand-painted. For businesses and communities ready to commit to a wall for a decade.',
-    surface: 'Interior + exterior walls',
-    leadTime: '6–10 weeks',
-    priceRange: 'By scope',
-    image: featuredByMedium.mural?.heroImage,
-    altTitle: featuredByMedium.mural?.title,
-    placeholder: 'Mural · interior accent wall',
-  },
-  {
-    slug: 'commissions',
-    label: 'Custom & other',
-    tagline: 'Something else in mind?',
-    voice: "Ink, grayscale, digital, or a format I haven't tried yet. If it's strange and worth doing, get in touch.",
-    surface: 'Varies',
-    leadTime: 'Varies',
-    priceRange: 'By scope',
-    image: featuredByMedium.other?.heroImage,
-    altTitle: featuredByMedium.other?.title,
-    placeholder: 'Custom commission · ink + grayscale study',
-  },
-]
-
-// Resolve image URLs and attach a testimonial if one exists for this service.
+// Resolve Sanity image URLs and attach a testimonial if one exists for the service.
 const servicesForDisplay = services.map((s) => {
+  const featured = featuredByMedium[s.mediumKey]
   const t = testimonialByService[s.slug]
   return {
     ...s,
-    imageUrl: s.image ? urlFor(s.image).width(800).height(1000).fit('crop').url() : null,
+    altTitle: featured?.title,
+    imageUrl: featured?.heroImage
+      ? urlFor(featured.heroImage).width(800).height(1000).fit('crop').url()
+      : null,
     quote: t
       ? { text: t.quote, author: t.attributionName, org: t.attributionOrg }
       : null,

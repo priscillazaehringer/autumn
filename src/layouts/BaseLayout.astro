@@ -83,9 +83,25 @@ const websiteSchema = {
   inLanguage: 'en-US',
 }
 
-// TEMPLATE NOTE: makesOffer below describes Autumn's specific service mix
-// (chalk, windows, pet portraits, murals, custom). When forking for another
-// artist, edit this list to match their offerings.
+// makesOffer is derived from siteConfig.services so the schema and the
+// /services page stay in sync — edit a service in site.config.js and
+// both update.
+const makesOffer = siteConfig.services.map((s) => {
+  const offer = {
+    '@type': 'Offer',
+    itemOffered: {
+      '@type': 'Service',
+      name: s.schemaName,
+      description: s.schemaDescription,
+    },
+  }
+  if (s.schemaPriceUSD) {
+    offer.price = s.schemaPriceUSD
+    offer.priceCurrency = 'USD'
+  }
+  return offer
+})
+
 const businessSchema = {
   '@context': 'https://schema.org',
   '@type': 'ProfessionalService',
@@ -99,57 +115,11 @@ const businessSchema = {
   },
   email: siteConfig.email,
   address: postalAddress,
-  // Service area — worldwide. Travel covered in commission quote.
   areaServed: {
     '@type': 'Place',
     name: 'Worldwide',
   },
-  // Lists the offerings without going full Service-schema-per-item.
-  // This is enough for search engines to know what she does.
-  makesOffer: [
-    {
-      '@type': 'Offer',
-      itemOffered: {
-        '@type': 'Service',
-        name: 'Chalk art',
-        description: 'Festival commissions, brand activations, public art weekends. Designed for photography.',
-      },
-    },
-    {
-      '@type': 'Offer',
-      itemOffered: {
-        '@type': 'Service',
-        name: 'Window painting',
-        description: 'Holiday windows, grand openings, seasonal storefront art. Live painted on glass.',
-      },
-    },
-    {
-      '@type': 'Offer',
-      itemOffered: {
-        '@type': 'Service',
-        name: 'Pet portraits',
-        description: 'Hand-painted oil portraits on 5×7 wrapped canvas. One animal per canvas.',
-      },
-      price: '147',
-      priceCurrency: 'USD',
-    },
-    {
-      '@type': 'Offer',
-      itemOffered: {
-        '@type': 'Service',
-        name: 'Murals',
-        description: 'Permanent interior and exterior murals for businesses and communities.',
-      },
-    },
-    {
-      '@type': 'Offer',
-      itemOffered: {
-        '@type': 'Service',
-        name: 'Custom commissions',
-        description: 'Ink, grayscale, digital, or experimental formats by request.',
-      },
-    },
-  ],
+  makesOffer,
   sameAs: [instagramUrl],
 }
 ---

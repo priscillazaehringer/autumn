@@ -1,6 +1,9 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro'
 import { sanityClient, urlFor } from '../lib/sanity.js'
+import { siteConfig } from '../site.config.js'
+
+const m = siteConfig.media
 
 // ---------- POLAROID FAVORITES ----------
 // Hand-picked slugs from Sanity — order here drives display order on the page.
@@ -61,8 +64,8 @@ const polaroids = POLAROIDS.map((p) => {
            including iOS Safari. Poster shows while loading. -->
       <div class="relative bg-stone-200 aspect-[4/3] md:aspect-auto overflow-hidden order-1 md:order-2">
 <video
-  src="https://res.cloudinary.com/dztnasb08/video/upload/q_auto/f_auto/v1778120506/about_autumn_ortp8i.mp4"
-  poster="https://res.cloudinary.com/dztnasb08/image/upload/q_auto/f_auto/v1778119819/galena_chozmw.jpg"
+  src={m.aboutVideo}
+  poster={m.aboutPoster}
   class="absolute inset-0 w-full h-full object-cover"
   autoplay
   loop
@@ -71,7 +74,7 @@ const polaroids = POLAROIDS.map((p) => {
   preload="metadata"
   aria-label="Autumn at work — Maple Grove"
 >
-  <img src="https://res.cloudinary.com/dztnasb08/image/upload/q_auto/f_auto/v1778119819/galena_chozmw.jpg" alt="Autumn at work — Maple Grove" class="absolute inset-0 w-full h-full object-cover" />
+  <img src={m.aboutPoster} alt="Autumn at work — Maple Grove" class="absolute inset-0 w-full h-full object-cover" />
 </video>
       </div>
 
@@ -84,7 +87,7 @@ const polaroids = POLAROIDS.map((p) => {
         <div class="relative inline-block w-full max-w-sm mx-auto md:max-w-none">
           <div class="absolute bg-gold-100 rounded-md" style="top: 20px; left: 20px; right: -20px; bottom: -20px;" aria-hidden="true"></div>
           <figure class="relative aspect-[4/5] bg-stone-200 rounded-md overflow-hidden shadow-[0_20px_50px_-20px_rgba(28,25,23,0.25)]">
-            <img src="https://res.cloudinary.com/dztnasb08/image/upload/q_auto/f_auto/v1778119827/Autumn-Zaehringer-scaled_uuzmbb.jpg" alt="Autumn Zaehringer" class="w-full h-full object-cover" />
+            <img src={m.artistPortrait} alt={siteConfig.artistName} class="w-full h-full object-cover" />
           </figure>
         </div>
       </div>
@@ -143,21 +146,14 @@ const polaroids = POLAROIDS.map((p) => {
     </div>
 
     <div class="grid grid-cols-2 md:grid-cols-5 gap-x-6 gap-y-10 md:gap-x-12 items-center justify-items-center">
-      <div class="logo-cell">
-        <img src="https://res.cloudinary.com/dztnasb08/image/upload/q_auto/f_auto/v1778119816/chalkthewalk_ygjd7b.png" alt="Mt. Vernon Chalk the Walk" />
-      </div>
-      <div class="logo-cell">
-        <img src="https://res.cloudinary.com/dztnasb08/image/upload/q_auto/f_auto/v1778119828/chalkartfest_tlopqu.png" alt="Chalk Art Fest" />
-      </div>
-      <div class="logo-cell">
-        <img src="https://res.cloudinary.com/dztnasb08/image/upload/q_auto/f_auto/v1778119817/chalkfest_butqhz.png" alt="Chalkfest" />
-      </div>
-      <div class="logo-cell">
-        <img src="https://res.cloudinary.com/dztnasb08/image/upload/q_auto/f_auto/v1778119818/herkyonparade_gcehzs.png" alt="Herky on Parade" />
-      </div>
-      <div class="logo-cell col-span-2 md:col-span-1">
-        <img src="https://res.cloudinary.com/dztnasb08/image/upload/q_auto/f_auto/v1778119825/temeart_pow3tk.svg" alt="Tempe Festival of the Arts" />
-      </div>
+      {m.festivalLogos.map((logo, i) => {
+        const lastAndOdd = i === m.festivalLogos.length - 1 && m.festivalLogos.length % 2 === 1
+        return (
+          <div class={`logo-cell ${lastAndOdd ? 'col-span-2 md:col-span-1' : ''}`}>
+            <img src={logo.src} alt={logo.name} />
+          </div>
+        )
+      })}
     </div>
 
     <p class="mt-16 text-sm text-stone-500 max-w-md">
