@@ -327,31 +327,32 @@ const businessSchema = {
           </form>
         </div>
 
-        <!-- Browse (right) -->
-        <div class="md:col-span-3">
-          <p class="text-[10px] uppercase tracking-[0.2em] text-stone-500 mb-4">Browse</p>
-          <ul class="flex flex-col gap-2 text-sm text-stone-700">
-            <li><a href="/work" class="hover:text-gold-700 transition">Work</a></li>
-            <li><a href="/services" class="hover:text-gold-700 transition">Services</a></li>
-            <li><a href="/about" class="hover:text-gold-700 transition">About</a></li>
-            <li><a href="/notes" class="hover:text-gold-700 transition">Notes</a></li>
-          </ul>
-        </div>
+        <!-- Browse + Contact: side-by-side on mobile, dissolves into parent grid on desktop -->
+        <div class="grid grid-cols-2 gap-8 md:contents">
+          <div class="md:col-span-3">
+            <p class="text-[10px] uppercase tracking-[0.2em] text-stone-500 mb-4">Browse</p>
+            <ul class="flex flex-col gap-2 text-sm text-stone-700">
+              <li><a href="/work" class="hover:text-gold-700 transition">Work</a></li>
+              <li><a href="/services" class="hover:text-gold-700 transition">Services</a></li>
+              <li><a href="/about" class="hover:text-gold-700 transition">About</a></li>
+              <li><a href="/notes" class="hover:text-gold-700 transition">Notes</a></li>
+            </ul>
+          </div>
 
-        <!-- Contact (far right) -->
-        <div class="md:col-span-2">
-          <p class="text-[10px] uppercase tracking-[0.2em] text-stone-500 mb-4">Contact</p>
-          <ul class="flex flex-col gap-2 text-sm text-stone-700">
-            <li><a href="mailto:aezaehri@gmail.com" class="hover:text-gold-700 transition break-all">Email</a></li>
-            <li><a href="https://instagram.com/autzart" class="hover:text-gold-700 transition">Instagram</a></li>
-          </ul>
+          <div class="md:col-span-2">
+            <p class="text-[10px] uppercase tracking-[0.2em] text-stone-500 mb-4">Contact</p>
+            <ul class="flex flex-col gap-2 text-sm text-stone-700">
+              <li><a href="mailto:aezaehri@gmail.com" class="hover:text-gold-700 transition break-all">Email</a></li>
+              <li><a href="https://instagram.com/autzart" class="hover:text-gold-700 transition">Instagram</a></li>
+            </ul>
+          </div>
         </div>
 
       </div>
 
       <!-- Legal bar — single tight strip -->
       <div class="border-t border-stone-200">
-        <div class="max-w-5xl mx-auto px-6 py-5 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs text-stone-500">
+        <div class="max-w-5xl mx-auto px-6 py-5 flex flex-col items-center text-center gap-3 md:flex-row md:items-center md:text-left md:justify-between text-xs text-stone-500">
           <p>
             <span class="font-serif text-stone-900 text-sm mr-3">Autumn Z Art</span>
             <span class="text-stone-400">·</span>
@@ -359,7 +360,7 @@ const businessSchema = {
             <span class="text-stone-400 ml-3">·</span>
             <span class="ml-3">© {new Date().getFullYear()}</span>
           </p>
-          <div class="flex gap-5 flex-wrap">
+          <div class="flex gap-5 flex-wrap justify-center md:justify-start">
             <a href="/privacy" class="hover:text-stone-900 transition">Privacy</a>
             <a href="https://priscillazaehringer.com" class="hover:text-stone-900 transition">Site by priscillazaehringer.com</a>
           </div>
