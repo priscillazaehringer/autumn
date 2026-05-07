@@ -14,6 +14,22 @@ const featuredByMedium = await sanityClient.fetch(
   }`
 )
 
+const allTestimonials = await sanityClient.fetch(`
+  *[_type == "testimonial"] | order(order asc, year desc, _createdAt desc) {
+    quote,
+    attributionName,
+    attributionOrg,
+    service,
+  }
+`)
+
+const testimonialByService = {}
+for (const t of allTestimonials) {
+  if (t.service && !testimonialByService[t.service]) {
+    testimonialByService[t.service] = t
+  }
+}
+
 // Service definitions, in popularity order: chalk, windows, portraits, murals, custom.
 // Note: there's no `href` field anymore — each service row is a div, not a link.
 // The "Inquire about [service]" button uses data-inquire to open the contact drawer.
@@ -80,11 +96,17 @@ const services = [
   },
 ]
 
-// Resolve image URLs (or null → stripe placeholder).
-const servicesForDisplay = services.map((s) => ({
-  ...s,
-  imageUrl: s.image ? urlFor(s.image).width(800).height(1000).fit('crop').url() : null,
-}))
+// Resolve image URLs and attach a testimonial if one exists for this service.
+const servicesForDisplay = services.map((s) => {
+  const t = testimonialByService[s.slug]
+  return {
+    ...s,
+    imageUrl: s.image ? urlFor(s.image).width(800).height(1000).fit('crop').url() : null,
+    quote: t
+      ? { text: t.quote, author: t.attributionName, org: t.attributionOrg }
+      : null,
+  }
+})
 
 const faqs = [
   { q: 'How far do you travel?', a: 'Based in Iowa with easy travel throughout the Midwest. Willing to travel nationally and internationally, with travel covered in the quote.' },
@@ -162,6 +184,17 @@ const faqs = [
                     <dd class="text-gold-600 font-medium">{s.priceRange}</dd>
                   </div>
                 </dl>
+
+                {s.quote && (
+                  <figure class="border-l-2 border-gold-400 pl-5 py-2 mb-10 max-w-lg">
+                    <blockquote class="font-serif italic text-lg md:text-xl text-stone-700 leading-snug">
+                      “{s.quote.text}”
+                    </blockquote>
+                    <figcaption class="text-xs uppercase tracking-[0.18em] text-stone-500 mt-3">
+                      {s.quote.author} · {s.quote.org}
+                    </figcaption>
+                  </figure>
+                )}
 
                 <button
                   type="button"
