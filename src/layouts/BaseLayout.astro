@@ -1,6 +1,7 @@
 ---
 import ContactDrawer from '../components/ContactDrawer.astro'
 import { sanityClient } from '../lib/sanity.js'
+import { siteConfig, instagramUrl } from '../site.config.js'
 import '../styles/global.css'
 
 interface Props {
@@ -9,10 +10,10 @@ interface Props {
 }
 
 const { title, description } = Astro.props as Props
-const pageTitle = title || 'Autumn Z Art'
-const pageDescription = description || 'Award-winning chalk and public art for businesses, festivals, and communities.'
+const pageTitle = title || siteConfig.defaultTitle
+const pageDescription = description || siteConfig.defaultDescription
 
-const SITE_URL = 'https://autumnzart.com'
+const SITE_URL = siteConfig.domain
 
 const todayISO = new Date().toISOString().split('T')[0]
 
@@ -29,7 +30,7 @@ const nextPublicEvent = await sanityClient.fetch(
   { today: todayISO }
 )
 
-const currentStatus = 'Booking summer festivals · 2026'
+const currentStatus = siteConfig.statusFallback
 
 let statusEventLabel = null
 if (nextPublicEvent) {
@@ -43,28 +44,27 @@ if (nextPublicEvent) {
 }
 
 const canonicalUrl = new URL(Astro.url.pathname, SITE_URL).href
-const ogImage = 'https://res.cloudinary.com/dztnasb08/image/upload/q_auto/f_auto/v1778119838/maplegrove_qa3oyf.jpg'
+const ogImage = siteConfig.ogImage
+const postalAddress = {
+  '@type': 'PostalAddress',
+  addressLocality: siteConfig.city,
+  addressRegion: siteConfig.state,
+  addressCountry: siteConfig.country,
+}
 
 const personSchema = {
   '@context': 'https://schema.org',
   '@type': 'Person',
   '@id': `${SITE_URL}/#person`,
-  name: 'Autumn Zaehringer',
-  alternateName: 'Autumn Z',
-  jobTitle: 'Chalk, Mural, Window, and Pet Portrait Artist',
-  description: 'Iowa-based artist creating chalk festival pieces, hand-painted windows, custom murals, and oil pet portraits. Travels worldwide for commissions.',
+  name: siteConfig.artistName,
+  alternateName: siteConfig.artistAlternateName,
+  jobTitle: siteConfig.jobTitle,
+  description: siteConfig.personDescription,
   url: SITE_URL,
-  image: 'https://res.cloudinary.com/dztnasb08/image/upload/q_auto/f_auto/v1778119838/maplegrove_qa3oyf.jpg',
-  sameAs: [
-    'https://instagram.com/autzart',
-  ],
-  address: {
-    '@type': 'PostalAddress',
-    addressLocality: 'Cedar Rapids',
-    addressRegion: 'IA',
-    addressCountry: 'US',
-  },
-  email: 'aezaehri@gmail.com',
+  image: ogImage,
+  sameAs: [instagramUrl],
+  address: postalAddress,
+  email: siteConfig.email,
   worksFor: {
     '@id': `${SITE_URL}/#business`,
   },
@@ -75,32 +75,30 @@ const websiteSchema = {
   '@type': 'WebSite',
   '@id': `${SITE_URL}/#website`,
   url: SITE_URL,
-  name: 'Autumn Z Art',
-  description: 'Iowa chalk, mural, and pet portrait artist. Booking commissions worldwide.',
+  name: siteConfig.brandName,
+  description: siteConfig.websiteDescription,
   publisher: {
     '@id': `${SITE_URL}/#person`,
   },
   inLanguage: 'en-US',
 }
 
+// TEMPLATE NOTE: makesOffer below describes Autumn's specific service mix
+// (chalk, windows, pet portraits, murals, custom). When forking for another
+// artist, edit this list to match their offerings.
 const businessSchema = {
   '@context': 'https://schema.org',
   '@type': 'ProfessionalService',
   '@id': `${SITE_URL}/#business`,
-  name: 'Autumn Z Art',
-  description: 'Custom chalk art, murals, hand-painted windows, and oil pet portraits for businesses, festivals, and private clients. Commissions open for 2026 and 2027.',
+  name: siteConfig.brandName,
+  description: siteConfig.businessDescription,
   url: SITE_URL,
-  image: 'https://res.cloudinary.com/dztnasb08/image/upload/q_auto/f_auto/v1778119838/maplegrove_qa3oyf.jpg',
+  image: ogImage,
   founder: {
     '@id': `${SITE_URL}/#person`,
   },
-  email: 'aezaehri@gmail.com',
-  address: {
-    '@type': 'PostalAddress',
-    addressLocality: 'Cedar Rapids',
-    addressRegion: 'IA',
-    addressCountry: 'US',
-  },
+  email: siteConfig.email,
+  address: postalAddress,
   // Service area — worldwide. Travel covered in commission quote.
   areaServed: {
     '@type': 'Place',
@@ -152,9 +150,7 @@ const businessSchema = {
       },
     },
   ],
-  sameAs: [
-    'https://instagram.com/autzart',
-  ],
+  sameAs: [instagramUrl],
 }
 ---
 
@@ -176,7 +172,7 @@ const businessSchema = {
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={pageDescription} />
     <meta property="og:image" content={ogImage} />
-    <meta property="og:site_name" content="Autumn Z Art" />
+    <meta property="og:site_name" content={siteConfig.brandName} />
 
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:url" content={canonicalUrl} />
@@ -232,7 +228,7 @@ const businessSchema = {
 
     <header class="border-b border-stone-200 relative z-50 bg-stone-50">
       <nav class="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
-        <a href="/" class="font-serif text-xl tracking-tight relative z-50">Autumn Z Art</a>
+        <a href="/" class="font-serif text-xl tracking-tight relative z-50">{siteConfig.brandName}</a>
 
         <div class="hidden md:flex items-center gap-8 text-sm text-stone-600">
           <a href="/work" class="hover:text-stone-900 transition border-b-2 border-transparent aria-[current=page]:border-gold-500 pb-1" aria-current={Astro.url.pathname.startsWith('/work') ? 'page' : undefined}>Work</a>
@@ -271,7 +267,7 @@ const businessSchema = {
           </button>
         </div>
         <div class="border-t border-stone-200 px-6 py-6 text-center">
-          <p class="text-sm text-stone-500">aezaehri@gmail.com · @autzart</p>
+          <p class="text-sm text-stone-500">{siteConfig.email} · @{siteConfig.instagramHandle}</p>
         </div>
       </div>
     </header>
@@ -342,8 +338,8 @@ const businessSchema = {
           <div class="md:col-span-2">
             <p class="text-[10px] uppercase tracking-[0.2em] text-stone-500 mb-4">Contact</p>
             <ul class="flex flex-col gap-2 text-sm text-stone-700">
-              <li><a href="mailto:aezaehri@gmail.com" class="hover:text-gold-700 transition break-all">Email</a></li>
-              <li><a href="https://instagram.com/autzart" class="hover:text-gold-700 transition">Instagram</a></li>
+              <li><a href={`mailto:${siteConfig.email}`} class="hover:text-gold-700 transition break-all">Email</a></li>
+              <li><a href={instagramUrl} class="hover:text-gold-700 transition">Instagram</a></li>
             </ul>
           </div>
         </div>
@@ -354,9 +350,9 @@ const businessSchema = {
       <div class="border-t border-stone-200">
         <div class="max-w-5xl mx-auto px-6 py-5 flex flex-col items-center text-center gap-3 md:flex-row md:items-center md:text-left md:justify-between text-xs text-stone-500">
           <p>
-            <span class="font-serif text-stone-900 text-sm mr-3">Autumn Z Art</span>
+            <span class="font-serif text-stone-900 text-sm mr-3">{siteConfig.brandName}</span>
             <span class="text-stone-400">·</span>
-            <span class="ml-3">Cedar Rapids, IA</span>
+            <span class="ml-3">{siteConfig.city}, {siteConfig.state}</span>
             <span class="text-stone-400 ml-3">·</span>
             <span class="ml-3">© {new Date().getFullYear()}</span>
           </p>

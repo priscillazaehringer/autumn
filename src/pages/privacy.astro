@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro'
+import { siteConfig } from '../site.config.js'
 
 const lastUpdated = 'May 2026'
 ---
@@ -40,7 +41,7 @@ const lastUpdated = 'May 2026'
 
       <div>
         <h2 class="font-serif text-2xl mb-3">Your information, your call</h2>
-        <p>If you've contacted me and want your information removed, just email me at <a href="mailto:aezaehri@gmail.com" class="underline hover:text-stone-900">aezaehri@gmail.com</a> and I'll delete our correspondence and any project notes.</p>
+        <p>If you've contacted me and want your information removed, just email me at <a href={`mailto:${siteConfig.email}`} class="underline hover:text-stone-900">{siteConfig.email}</a> and I'll delete our correspondence and any project notes.</p>
       </div>
 
       <div>
@@ -50,7 +51,7 @@ const lastUpdated = 'May 2026'
 
       <div>
         <h2 class="font-serif text-2xl mb-3">Questions</h2>
-        <p>Email me — <a href="mailto:aezaehri@gmail.com" class="underline hover:text-stone-900">aezaehri@gmail.com</a>.</p>
+        <p>Email me — <a href={`mailto:${siteConfig.email}`} class="underline hover:text-stone-900">{siteConfig.email}</a>.</p>
       </div>
 
     </div>

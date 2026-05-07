@@ -1,4 +1,5 @@
 ---
+import { siteConfig } from '../site.config.js'
 const FORMSPREE_ENDPOINT = 'https://formspree.io/f/xdabazap'
 ---
 
@@ -138,7 +139,7 @@ const FORMSPREE_ENDPOINT = 'https://formspree.io/f/xdabazap'
         >Send it →</button>
 
         <p style="font-size:0.75rem;color:rgb(120,113,108);line-height:1.5;text-align:center;margin:16px 0 0;font-family:'Inter',sans-serif;">
-          Or email <a href="mailto:aezaehri@gmail.com" style="color:rgb(180,132,25);text-decoration:underline;text-underline-offset:4px;">aezaehri@gmail.com</a> directly.
+          Or email <a href={`mailto:${siteConfig.email}`} style="color:rgb(180,132,25);text-decoration:underline;text-underline-offset:4px;">{siteConfig.email}</a> directly.
         </p>
       </form>
     </div>
@@ -164,7 +165,7 @@ const FORMSPREE_ENDPOINT = 'https://formspree.io/f/xdabazap'
       <div style="text-align:center;padding:32px 0;">
         <h2 style="font-family:'Instrument Serif',serif;font-size:1.5rem;color:rgb(28,25,23);margin:0 0 16px;font-weight:400;">Hmm, that didn't go through.</h2>
         <p style="font-size:0.875rem;color:rgb(87,83,78);line-height:1.6;margin:0 0 24px;font-family:'Inter',sans-serif;">
-          Easiest workaround: email me at <a href="mailto:aezaehri@gmail.com" style="color:rgb(180,132,25);text-decoration:underline;text-underline-offset:4px;">aezaehri@gmail.com</a> and I'll reply same day.
+          Easiest workaround: email me at <a href={`mailto:${siteConfig.email}`} style="color:rgb(180,132,25);text-decoration:underline;text-underline-offset:4px;">{siteConfig.email}</a> and I'll reply same day.
         </p>
         <button
           type="button"
