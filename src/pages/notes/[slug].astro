@@ -173,4 +173,41 @@ const coverImageUrl = note.coverImage
     transition: transform 350ms cubic-bezier(0.22, 1, 0.36, 1), border-color 250ms, box-shadow 350ms;
   }
 
-  .ig-source-card:
+  .ig-source-card:hover {
+    transform: translateY(-2px);
+    border-color: rgb(214 211 209);
+    box-shadow: 0 12px 24px -12px rgba(28, 25, 23, 0.18);
+  }
+
+  .ig-source-icon {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    color: rgb(168 162 158);
+  }
+  .ig-source-icon svg { width: 100%; height: 100%; }
+
+  .ig-source-text { flex: 1; min-width: 0; }
+
+  .ig-source-eyebrow {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: rgb(168 162 158);
+    margin: 0 0 4px;
+  }
+
+  .ig-source-cta {
+    font-family: 'Instrument Serif', serif;
+    font-size: 1.125rem;
+    color: rgb(41 37 36);
+    margin: 0;
+  }
+
+  .ig-source-arrow {
+    display: inline-block;
+    margin-left: 4px;
+    transition: transform 250ms;
+  }
+  .ig-source-card:hover .ig-source-arrow { transform: translateX(3px); }
+</style>
