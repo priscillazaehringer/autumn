@@ -67,6 +67,16 @@
     @apply text-xs uppercase tracking-widest text-stone-500;
   }
 }
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 700ms cubic-bezier(0.22, 1, 0.36, 1), transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.reveal.is-visible { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+}
+
 .note-date {
   font-size: 0.7rem;
   text-transform: uppercase;

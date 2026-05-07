@@ -1,7 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro'
 import FinalCTA from '../components/FinalCTA.astro'
-import OnTourSection from '../components/ontoursection.astro'
+import OnTourSection from '../components/OnTourSection.astro'
 import { sanityClient } from '../lib/sanity.js'
 
 const todayISO = new Date().toISOString().split('T')[0]
@@ -60,9 +60,6 @@ const formatNoteDate = (iso) => {
 
 <BaseLayout title="Autumn Z Art — Iowa Chalk, Mural & Pet Portrait Artist">
 
-  <!-- ===========================================
-       VIDEO HERO
-       =========================================== -->
   <section class="relative w-full overflow-hidden bg-stone-900">
     <video
       autoplay
@@ -81,9 +78,8 @@ const formatNoteDate = (iso) => {
     <div class="absolute inset-0 bg-gradient-to-t from-stone-900/60 via-transparent to-transparent"></div>
 
     <div class="relative max-w-6xl mx-auto px-6 py-32 md:py-48 min-h-[80vh] flex flex-col justify-end">
-      <h1 class="h1-display text-stone-50 mb-6 md:mb-8">
-        Iowa Chalk, Mural<br/>
-        & Pet Portrait Artist.
+      <h1 class="h1-display text-stone-50 mb-6 md:mb-8 max-w-[14ch]">
+        Iowa Chalk, Mural & Pet Portrait Artist.
       </h1>
       <p class="hero-lede text-stone-200 mb-8 md:mb-10">
         Currently booking festivals, windows, and pet portraits for 2026 & 2027.
@@ -102,17 +98,13 @@ const formatNoteDate = (iso) => {
     </div>
   </section>
 
-  <!-- ===========================================
-       PICK YOUR SURFACE — asymmetric layout
-       =========================================== -->
   <section class="bg-gold-50 py-24 md:py-32">
     <div class="max-w-5xl mx-auto px-6">
 
       <div class="text-center mb-14 md:mb-20 max-w-2xl mx-auto">
         <p class="eyebrow mb-4">Services</p>
-        <h2 class="h2-section mb-6">
-          What surface are you<br/>
-          trying to fill?
+        <h2 class="h2-section mb-6 max-w-xl mx-auto">
+          What surface are you trying to fill?
         </h2>
         <p class="body-prose text-stone-600">
           Pick one! I'll send you right over!
@@ -198,25 +190,17 @@ const formatNoteDate = (iso) => {
     </div>
   </section>
 
-  <!-- ===========================================
-       UPCOMING EVENTS — On Tour section
-       =========================================== -->
   {eventsForDisplay.length > 0 && (
     <OnTourSection events={eventsForDisplay} />
   )}
 
-  <!-- ===========================================
-       CHALK, THEN A TARP — five-frame story of one
-       piece and the rain that hit mid-chalk.
-       =========================================== -->
   <section class="reveal bg-gold-50 border-y border-stone-200">
     <div class="max-w-7xl mx-auto px-6 pt-24 md:pt-32 pb-32 md:pb-48">
 
       <div class="max-w-2xl mb-14 md:mb-20">
         <p class="eyebrow mb-4">One weekend</p>
-        <h2 class="h2-section mb-6">
-          You make it<br/>
-          anyways.
+        <h2 class="h2-section mb-6 max-w-md">
+          You make it anyways.
         </h2>
         <p class="body-prose max-w-md">
           Outdoor festivals mean weather. Sometimes you finish in the sun. Sometimes the rain hits halfway through and you throw a tarp over twenty hours of work.
@@ -285,18 +269,13 @@ const formatNoteDate = (iso) => {
     </div>
   </section>
 
-  <!-- ===========================================
-       FROM THE STUDIO — recent notes teaser.
-       Only renders when there's at least one
-       featured note in Sanity.
-       =========================================== -->
   {recentNotes.length > 0 && (
     <section class="max-w-5xl mx-auto px-6 py-24 md:py-32">
 
       <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-14 md:mb-20">
         <div>
           <p class="eyebrow mb-4">From the studio</p>
-          <h2 class="h2-section max-w-xl">Notes between<br/>the pieces.</h2>
+          <h2 class="h2-section max-w-xl">Notes between the pieces.</h2>
         </div>
         <a href="/notes" class="text-sm text-gold-700 hover:text-gold-900 underline underline-offset-4 font-medium whitespace-nowrap self-start md:self-end">
           Read all notes →

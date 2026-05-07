@@ -1,17 +1,7 @@
 ---
-// =============================================
-// ON TOUR — upcoming events as concert tour dates
-// =============================================
-// Drop-in replacement for "Where to find me next."
-// Treats the events list like a band's tour poster:
-// big serif headline, double-rule frame, monospaced
-// city + serif venue name per row.
-// =============================================
-
 const props = Astro.props
 const events = props.events || []
 
-// Get current year for the subtitle
 const currentYear = new Date().getFullYear()
 
 // Format the day-of-week label for each event

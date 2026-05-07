@@ -1,10 +1,10 @@
 ---
-import Layout from '../layouts/Layout.astro'
+import BaseLayout from '../layouts/BaseLayout.astro'
 
 const lastUpdated = 'May 2026'
 ---
 
-<Layout title="Privacy Policy · Autumn Z Art" description="How Autumn Z Art collects, uses, and protects your information.">
+<BaseLayout title="Privacy Policy · Autumn Z Art" description="How Autumn Z Art collects, uses, and protects your information.">
 
   <section class="max-w-3xl mx-auto px-6 py-24 md:py-32">
 
@@ -35,7 +35,7 @@ const lastUpdated = 'May 2026'
 
       <div>
         <h2 class="font-serif text-2xl mb-3">Tools this site uses</h2>
-        <p>This site is hosted on Netlify and built with Astro. Netlify keeps standard server logs (IP addresses, browser info) for security and performance, the same as any web host. If I add analytics in the future, I'll use a privacy-focused tool that doesn't track individuals, and I'll update this page.</p>
+        <p>This site is hosted on Vercel and built with Astro. Vercel keeps standard server logs (IP addresses, browser info) for security and performance, the same as any web host. If I add analytics in the future, I'll use a privacy-focused tool that doesn't track individuals, and I'll update this page.</p>
       </div>
 
       <div>
@@ -57,4 +57,4 @@ const lastUpdated = 'May 2026'
 
   </section>
 
-</Layout>
+</BaseLayout>
