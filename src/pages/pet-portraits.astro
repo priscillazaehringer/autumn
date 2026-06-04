@@ -22,8 +22,9 @@ const REGULAR_PRICE = 147
 
 // Format each slot for display.
 // In the Studio, add two fields to portraitSlot: `price` (number) and
-// `isLaunch` (boolean). Launch slots are the $47 Cedar Rapids hand-delivery
-// deal. If the fields are absent, slots fall back to the regular price.
+// `isLaunch` (boolean). Launch slots are the discounted, local Cedar Rapids
+// hand-delivery deal — set their price in Sanity. If the fields are absent,
+// slots fall back to the regular price.
 const slotsForDisplay = slots.map((s) => {
   const date = new Date(s.shipDate + 'T12:00:00') // noon avoids timezone day-shift
   const monthShort = date.toLocaleDateString('en-US', { month: 'short' })
