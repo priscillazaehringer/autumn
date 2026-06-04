@@ -143,7 +143,7 @@ const faqs = [
     <div class="absolute inset-0 bg-gradient-to-r from-stone-900/85 via-stone-900/55 to-stone-900/30"></div>
     <div class="absolute inset-0 bg-gradient-to-t from-stone-900/75 via-transparent to-stone-900/20"></div>
 
-    <div class="relative max-w-6xl mx-auto px-6 py-20 md:py-28 min-h-[48vh] md:min-h-[58vh] flex flex-col justify-end">
+    <div class="relative max-w-6xl mx-auto px-6 py-24 md:py-36 min-h-[70vh] md:min-h-[82vh] flex flex-col justify-end">
       <p class="text-xs uppercase tracking-[0.2em] text-gold-300 font-medium mb-6">Pet portraits</p>
       <h1 class="h1-display mb-6 text-stone-50 max-w-[18ch]">
         Hand-painted pet portraits.
@@ -414,48 +414,6 @@ const faqs = [
     </div>
   </section>
 
-  <!-- Cat companion: eyes follow your cursor (desktop) or finger (mobile).
-       Purely decorative — pointer-events:none so it never blocks a tap. -->
-  <div id="cat-companion" class="cat-companion" aria-hidden="true">
-    <svg viewBox="0 0 120 132" width="100%" height="100%" fill="none">
-      <path d="M38 40 L30 12 L56 30 Z" fill="#1c1917"/>
-      <path d="M82 40 L90 12 L64 30 Z" fill="#1c1917"/>
-      <path d="M40 34 L35 18 L50 30 Z" fill="#57534e"/>
-      <path d="M80 34 L85 18 L70 30 Z" fill="#57534e"/>
-      <path d="M84 116 C112 114 116 82 96 78" stroke="#1c1917" stroke-width="9" stroke-linecap="round"/>
-      <path d="M32 122 C32 86 42 66 60 66 C78 66 88 86 88 122 Z" fill="#1c1917"/>
-      <circle cx="60" cy="46" r="27" fill="#1c1917"/>
-      <ellipse id="cat-eye-l" cx="50" cy="46" rx="7.5" ry="9" fill="#fbbf24"/>
-      <ellipse id="cat-eye-r" cx="70" cy="46" rx="7.5" ry="9" fill="#fbbf24"/>
-      <g id="cat-pupil-l">
-        <ellipse cx="50" cy="46" rx="2.6" ry="4.6" fill="#1c1917"/>
-        <circle cx="51.2" cy="43.6" r="1" fill="#ffffff" opacity="0.85"/>
-      </g>
-      <g id="cat-pupil-r">
-        <ellipse cx="70" cy="46" rx="2.6" ry="4.6" fill="#1c1917"/>
-        <circle cx="71.2" cy="43.6" r="1" fill="#ffffff" opacity="0.85"/>
-      </g>
-      <path d="M57 55 L63 55 L60 59 Z" fill="#f9a8b4"/>
-      <path d="M60 59 C60 62 57 63 55 61" stroke="#3f3f46" stroke-width="1" stroke-linecap="round"/>
-      <path d="M60 59 C60 62 63 63 65 61" stroke="#3f3f46" stroke-width="1" stroke-linecap="round"/>
-      <g stroke="#e7e5e4" stroke-width="1" stroke-linecap="round" opacity="0.8">
-        <path d="M44 53 L26 49"/>
-        <path d="M44 57 L25 58"/>
-        <path d="M76 53 L94 49"/>
-        <path d="M76 57 L95 58"/>
-      </g>
-      <ellipse cx="49" cy="121" rx="9" ry="6" fill="#0c0a09"/>
-      <ellipse cx="71" cy="121" rx="9" ry="6" fill="#0c0a09"/>
-      <g>
-        <circle cx="100" cy="118" r="11" fill="#d97706"/>
-        <path d="M91 114 C97 109 105 111 109 117" stroke="#b45309" stroke-width="1.3" fill="none"/>
-        <path d="M90 119 C96 115 106 117 110 121" stroke="#b45309" stroke-width="1.3" fill="none"/>
-        <path d="M93 123 C98 120 104 121 108 124" stroke="#92400e" stroke-width="1.3" fill="none"/>
-        <path d="M100 107 C100 99 88 99 90 91" stroke="#d97706" stroke-width="1.6" stroke-linecap="round" fill="none"/>
-      </g>
-    </svg>
-  </div>
-
 </BaseLayout>
 
 <script is:inline define:vars={{ portraitsForDisplay }}>
@@ -587,69 +545,4 @@ const faqs = [
     .portrait-marquee { overflow-x: auto; }
     .portrait-track { animation: none; }
   }
-
-  /* ===== Cat companion ===== */
-  .cat-companion {
-    position: fixed;
-    left: 14px;
-    bottom: 10px;
-    width: 68px;
-    z-index: 40;
-    pointer-events: none; /* never blocks taps or buttons */
-    filter: drop-shadow(0 6px 10px rgba(28, 25, 23, 0.18));
-  }
-  .cat-companion svg { display: block; }
-  #cat-pupil-l, #cat-pupil-r { transition: transform 120ms ease-out; }
-  @media (min-width: 768px) {
-    .cat-companion { width: 96px; left: 20px; bottom: 16px; }
-  }
 </style>
-
-<script is:inline>
-  (function () {
-    const cat = document.getElementById('cat-companion')
-    if (!cat) return
-    // Hold still for visitors who prefer reduced motion.
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
-
-    const eyes = [
-      { white: document.getElementById('cat-eye-l'), pupil: document.getElementById('cat-pupil-l') },
-      { white: document.getElementById('cat-eye-r'), pupil: document.getElementById('cat-pupil-r') },
-    ]
-    const MAX = 3 // how far a pupil can drift, in SVG units
-    let targetX = null, targetY = null, raf = null
-
-    function render() {
-      raf = null
-      eyes.forEach(({ white, pupil }) => {
-        if (!white || !pupil) return
-        const r = white.getBoundingClientRect()
-        const cx = r.left + r.width / 2
-        const cy = r.top + r.height / 2
-        let dx = 0, dy = 0
-        if (targetX !== null) {
-          const angle = Math.atan2(targetY - cy, targetX - cx)
-          dx = Math.cos(angle) * MAX
-          dy = Math.sin(angle) * MAX
-        }
-        pupil.setAttribute('transform', `translate(${dx.toFixed(2)} ${dy.toFixed(2)})`)
-      })
-    }
-    function schedule() { if (!raf) raf = requestAnimationFrame(render) }
-
-    function look(e) {
-      const pt = e.touches && e.touches[0] ? e.touches[0] : e
-      if (pt.clientX == null) return
-      targetX = pt.clientX
-      targetY = pt.clientY
-      schedule()
-    }
-    function recenter() { targetX = null; targetY = null; schedule() }
-
-    // Mouse on desktop, finger drags / scrolling on touch.
-    window.addEventListener('pointermove', look, { passive: true })
-    window.addEventListener('touchmove', look, { passive: true })
-    window.addEventListener('touchend', recenter, { passive: true })
-    window.addEventListener('pointerleave', recenter, { passive: true })
-  })()
-</script>
