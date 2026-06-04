@@ -59,15 +59,25 @@ const features = [
 // medium (your "Pet portrait" category). One hero image per project, so each
 // tile is a different animal. Add portraits in the Studio to grow this grid.
 const portraitProjects = await sanityClient.fetch(
-  `*[_type == "project" && medium == "portrait" && defined(heroImage) && slug.current != "simba"] | order(year desc, _createdAt desc) [0...9] {
+  `*[_type == "project" && medium == "portrait" && defined(heroImage) && slug.current != "simba"] | order(year desc, _createdAt desc) [0...12] {
     _id,
     title,
+    description,
+    year,
+    location,
     heroImage
   }`
 )
 
-const galleryImages = portraitProjects.map((p) => ({
-  src: urlFor(p.heroImage).width(800).height(1000).fit('crop').url(),
+const portraitsForDisplay = portraitProjects.map((p) => ({
+  id: p._id,
+  title: p.title || 'Pet portrait',
+  description: p.description || null,
+  year: p.year || null,
+  location: p.location || null,
+  // 4:5 thumb for the carousel; larger, uncropped image for the lightbox.
+  thumbUrl: urlFor(p.heroImage).width(700).height(875).fit('crop').url(),
+  fullUrl: urlFor(p.heroImage).width(1400).fit('max').url(),
   alt: p.title ? `Hand-painted oil portrait — ${p.title}` : 'Hand-painted oil pet portrait',
 }))
 
@@ -151,30 +161,69 @@ const faqs = [
     </div>
   </section>
 
-  <!-- GALLERY -->
-  {galleryImages.length > 0 && (
-    <section class="bg-stone-100 py-20 md:py-28">
-      <div class="max-w-6xl mx-auto px-6">
-        <div class="text-center mb-12 md:mb-16">
-          <p class="text-xs uppercase tracking-[0.2em] text-stone-500 mb-4">Recent portraits</p>
-          <h2 class="font-serif text-3xl md:text-4xl font-normal leading-tight">
-            Some of the animals I've painted.
-          </h2>
+  <!-- GALLERY — auto-scrolling carousel, click a portrait to open the lightbox -->
+  {portraitsForDisplay.length > 0 && (
+    <Fragment>
+      <section class="bg-stone-100 py-20 md:py-28">
+        <div class="max-w-6xl mx-auto px-6">
+          <div class="text-center mb-12 md:mb-16">
+            <p class="text-xs uppercase tracking-[0.2em] text-stone-500 mb-4">Recent portraits</p>
+            <h2 class="font-serif text-3xl md:text-4xl font-normal leading-tight">
+              Some of the animals I've painted.
+            </h2>
+            <p class="text-sm text-stone-500 mt-4">Tap any portrait to take a closer look.</p>
+          </div>
         </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-          {galleryImages.map((img) => (
-            <div class="aspect-[4/5] overflow-hidden rounded-lg bg-stone-200">
-              <img
-                src={img.src}
-                alt={img.alt}
-                class="w-full h-full object-cover hover:scale-105 transition duration-700"
-                loading="lazy"
-              />
-            </div>
-          ))}
+
+        <!-- Marquee: ~3 in view on desktop, scrolls right on its own, pauses on hover.
+             The list is duplicated so the loop is seamless; clones are hidden from
+             assistive tech. -->
+        <div id="portrait-marquee" class="portrait-marquee" aria-label="Recent pet portraits — scrolling gallery">
+          <div class="portrait-track">
+            {[...portraitsForDisplay, ...portraitsForDisplay].map((p, i) => (
+              <button
+                type="button"
+                class="portrait-card"
+                data-portrait-id={p.id}
+                aria-label={`View portrait — ${p.title}`}
+                aria-hidden={i >= portraitsForDisplay.length ? 'true' : undefined}
+                tabindex={i >= portraitsForDisplay.length ? -1 : undefined}
+              >
+                <img src={p.thumbUrl} alt={p.alt} loading="lazy" />
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <!-- PORTRAIT LIGHTBOX -->
+      <div
+        id="portrait-lightbox"
+        class="hidden fixed inset-0 z-[60] bg-stone-900/90 backdrop-blur-sm items-center justify-center p-4 md:p-12"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="portrait-lightbox-title"
+      >
+        <div id="portrait-lightbox-card" class="bg-stone-50 rounded-md max-w-3xl w-full max-h-[90vh] overflow-y-auto relative">
+          <button
+            id="portrait-lightbox-close"
+            type="button"
+            aria-label="Close"
+            class="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-stone-50/90 border border-stone-200 flex items-center justify-center text-stone-700 hover:bg-stone-900 hover:text-stone-50 hover:border-stone-900 transition"
+          >
+            <svg width="14" height="14" viewBox="0 0 14 14"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" /></svg>
+          </button>
+
+          <div id="portrait-lightbox-hero" class="bg-stone-100 flex items-center justify-center"></div>
+
+          <div class="p-6 md:p-10">
+            <p id="portrait-lightbox-eyebrow" class="text-xs uppercase tracking-[0.2em] text-gold-600 font-medium mb-3"></p>
+            <h2 id="portrait-lightbox-title" class="font-serif text-3xl md:text-4xl leading-tight mb-4 font-normal"></h2>
+            <p id="portrait-lightbox-description" class="hidden text-base text-stone-700 leading-relaxed max-w-2xl"></p>
+          </div>
         </div>
       </div>
-    </section>
+    </Fragment>
   )}
 
   <!-- WHAT YOU GET -->
@@ -366,3 +415,134 @@ const faqs = [
   </section>
 
 </BaseLayout>
+
+<script is:inline define:vars={{ portraitsForDisplay }}>
+  (function () {
+    const PORTRAITS = portraitsForDisplay
+    const byId = Object.fromEntries(PORTRAITS.map((p) => [p.id, p]))
+
+    const lb = document.getElementById('portrait-lightbox')
+    if (!lb) return // section not rendered (no portraits)
+
+    const card = document.getElementById('portrait-lightbox-card')
+    const hero = document.getElementById('portrait-lightbox-hero')
+    const eyebrow = document.getElementById('portrait-lightbox-eyebrow')
+    const title = document.getElementById('portrait-lightbox-title')
+    const desc = document.getElementById('portrait-lightbox-description')
+
+    function open(id) {
+      const p = byId[id]
+      if (!p) return
+
+      hero.innerHTML = ''
+      const img = document.createElement('img')
+      img.src = p.fullUrl
+      img.alt = p.alt
+      img.className = 'w-full max-h-[70vh] object-contain'
+      hero.appendChild(img)
+
+      eyebrow.textContent = ['Oil on canvas', p.location, p.year].filter(Boolean).join(' · ')
+      title.textContent = p.title
+
+      if (p.description) {
+        desc.textContent = p.description
+        desc.classList.remove('hidden')
+      } else {
+        desc.classList.add('hidden')
+      }
+
+      lb.classList.remove('hidden')
+      lb.classList.add('flex')
+      document.body.style.overflow = 'hidden'
+      card.scrollTop = 0
+    }
+
+    function close() {
+      lb.classList.add('hidden')
+      lb.classList.remove('flex')
+      document.body.style.overflow = ''
+    }
+
+    document.querySelectorAll('.portrait-card').forEach((c) => {
+      c.addEventListener('click', () => open(c.getAttribute('data-portrait-id')))
+    })
+
+    document.getElementById('portrait-lightbox-close').addEventListener('click', close)
+    lb.addEventListener('click', (e) => { if (e.target === lb) close() })
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !lb.classList.contains('hidden')) close()
+    })
+
+    // On touch, pause the marquee briefly so taps land on the right portrait.
+    const marquee = document.getElementById('portrait-marquee')
+    const track = marquee && marquee.querySelector('.portrait-track')
+    if (marquee && track) {
+      let resumeTimer
+      marquee.addEventListener('touchstart', () => {
+        clearTimeout(resumeTimer)
+        track.classList.add('is-paused')
+      }, { passive: true })
+      marquee.addEventListener('touchend', () => {
+        resumeTimer = setTimeout(() => track.classList.remove('is-paused'), 1500)
+      }, { passive: true })
+    }
+  })()
+</script>
+
+<style>
+  /* ===== Recent portraits marquee ===== */
+  .portrait-marquee {
+    overflow: hidden;
+    width: 100%;
+  }
+  .portrait-track {
+    display: flex;
+    width: max-content;
+    padding-inline: 1.5rem;
+    animation: portrait-scroll 50s linear infinite;
+    will-change: transform;
+  }
+  /* Pause on hover, on keyboard focus, and (via JS) on touch. */
+  .portrait-marquee:hover .portrait-track,
+  .portrait-marquee:focus-within .portrait-track,
+  .portrait-track.is-paused {
+    animation-play-state: paused;
+  }
+
+  .portrait-card {
+    flex: 0 0 auto;
+    width: 76vw;
+    max-width: 340px;
+    margin-right: 1rem;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    border-radius: 0.5rem;
+    border: 0;
+    padding: 0;
+    background: #e7e5e4;
+    cursor: pointer;
+    position: relative;
+  }
+  @media (min-width: 640px) { .portrait-card { width: 42vw; } }
+  @media (min-width: 1024px) { .portrait-card { width: 22rem; } }
+
+  .portrait-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .portrait-card:hover img { transform: scale(1.05); }
+
+  @keyframes portrait-scroll {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+
+  /* Respect reduced-motion: stop the auto-scroll, allow manual swipe instead. */
+  @media (prefers-reduced-motion: reduce) {
+    .portrait-marquee { overflow-x: auto; }
+    .portrait-track { animation: none; }
+  }
+</style>
