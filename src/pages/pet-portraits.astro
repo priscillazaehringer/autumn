@@ -10,21 +10,22 @@ const slots = await sanityClient.fetch(
     _id,
     shipDate,
     status,
-    checkoutUrl,
-    price,
-    isLaunch
+    checkoutUrl
   }`,
   { today: todayISO }
 )
 
-// Standard price; launch slots come in cheaper and are local-delivery only.
+// ---- Launch offer ----------------------------------------------------------
+// While LAUNCH_MODE is true, every available date is the local, hand-delivered
+// launch deal at LAUNCH_PRICE (shown struck through against REGULAR_PRICE).
+// When you start shipping nationally at the regular price, flip LAUNCH_MODE to
+// false — the badge, the "Launch" pills, and the discount all switch off, and
+// dates revert to REGULAR_PRICE. Just keep your Stripe links in sync with these.
+const LAUNCH_MODE = true
+const LAUNCH_PRICE = 57
 const REGULAR_PRICE = 147
 
 // Format each slot for display.
-// In the Studio, add two fields to portraitSlot: `price` (number) and
-// `isLaunch` (boolean). Launch slots are the discounted, local Cedar Rapids
-// hand-delivery deal — set their price in Sanity. If the fields are absent,
-// slots fall back to the regular price.
 const slotsForDisplay = slots.map((s) => {
   const date = new Date(s.shipDate + 'T12:00:00') // noon avoids timezone day-shift
   const monthShort = date.toLocaleDateString('en-US', { month: 'short' })
@@ -34,15 +35,14 @@ const slotsForDisplay = slots.map((s) => {
     shipLabel: `Ready ${monthShort} ${day}`,
     status: s.status,
     checkoutUrl: s.checkoutUrl || '#',
-    isLaunch: s.isLaunch === true,
-    price: typeof s.price === 'number' ? s.price : REGULAR_PRICE,
+    isLaunch: LAUNCH_MODE,
+    price: LAUNCH_MODE ? LAUNCH_PRICE : REGULAR_PRICE,
   }
 })
 
 // Launch-offer summary used by the hero badge + booking note.
-const launchSlots = slotsForDisplay.filter((s) => s.isLaunch)
-const hasLaunchSlots = launchSlots.some((s) => s.status !== 'booked')
-const launchPrice = launchSlots.length ? Math.min(...launchSlots.map((s) => s.price)) : null
+const hasLaunchSlots = LAUNCH_MODE && slotsForDisplay.some((s) => s.status !== 'booked')
+const launchPrice = LAUNCH_PRICE
 
 // Pull published testimonials, curated order first.
 // Add a "testimonial" type in the Sanity Studio with: quote, name, petName, status, order.
