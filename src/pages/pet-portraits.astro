@@ -22,7 +22,7 @@ const slotsForDisplay = slots.map((s) => {
   const day = date.getDate()
   return {
     id: s._id,
-    shipLabel: `Ships ${monthShort} ${day}`,
+    shipLabel: `Ready ${monthShort} ${day}`,
     status: s.status,
     checkoutUrl: s.checkoutUrl || '#',
   }
@@ -51,7 +51,7 @@ const features = [
   },
   {
     title: 'Ready to hang',
-    body: 'Wrapped canvas ships ready to display. No frame needed unless you want one.',
+    body: 'Wrapped canvas arrives ready to display. No frame needed unless you want one.',
   },
 ]
 
@@ -82,11 +82,11 @@ const portraitsForDisplay = portraitProjects.map((p) => ({
 }))
 
 const steps = [
-  { num: '01', text: 'Pick a ship date below' },
+  { num: '01', text: 'Pick a date below' },
   { num: '02', text: 'Check out and pay $147' },
   { num: '03', text: "I'll email you for your pet's photos and story" },
   { num: '04', text: 'I paint your pet.' },
-  { num: '05', text: 'Your portrait ships on the date you picked' },
+  { num: '05', text: "Your portrait's ready on the date you picked" },
 ]
 
 const faqs = [
@@ -104,15 +104,15 @@ const faqs = [
   },
   {
     q: 'How long does it take?',
-    a: 'About a week. I paint your pet during the week leading up to your ship date, and your portrait goes in the mail by the date you picked.',
+    a: "About a week. I paint your pet during the week leading up to the date you picked, and your portrait's ready to go — for pickup, delivery, or the mail — by then.",
   },
   {
     q: "What if I don't love it?",
     a: "Each portrait is hand-painted just for you, so I don't offer refunds. But if something feels off when you receive it — wrong angle, missing detail, anything — let me know within 7 days and I'll do my best to make it right.",
   },
   {
-    q: 'Do you ship internationally?',
-    a: "Not yet. Right now portraits ship within the US. International shipping might come later, but if you're outside the US, get in touch and we'll see what's possible.",
+    q: 'How do I get my portrait?',
+    a: "Right now I'm focused on my local area around Cedar Rapids — local pickup or hand-delivery — with US shipping rolling out from there. I'll sort out the best option with you after you book. International shipping isn't available yet, but if you're outside the US, get in touch and we'll see what's possible.",
   },
 ]
 ---
@@ -131,7 +131,7 @@ const faqs = [
           For the pet you love. $147 · Oil on canvas.
         </p>
         <a href="#pick-your-date" class="inline-block px-6 py-3.5 bg-stone-900 text-stone-50 rounded-md text-sm font-medium hover:bg-stone-800 transition">
-          Pick a ship date →
+          Pick a date →
         </a>
       </div>
       <div class="md:order-last order-first">
@@ -294,7 +294,7 @@ const faqs = [
       <div class="text-center mb-12 md:mb-16">
                 <p class="eyebrow-gold mb-4">Booking</p>
         <h2 class="font-serif text-4xl md:text-5xl font-normal leading-tight mb-4">
-          Pick a ship date.
+          Pick a date.
         </h2>
         <p class="text-base text-stone-600 max-w-md mx-auto">
           One pet, one painting per week. Pick the date your portrait arrives.
@@ -327,7 +327,7 @@ const faqs = [
           </div>
 
           <p class="text-center text-sm text-stone-600">
-            $147 per portrait. Includes shipping in the US.
+            $147 per portrait. Includes local delivery or US shipping.
           </p>
           <p class="text-center text-sm text-stone-500 mt-3 max-w-md mx-auto leading-relaxed">
             Painted just for you. If something feels off when it arrives, tell me within 7 days and I'll make it right.
@@ -337,7 +337,7 @@ const faqs = [
         <div class="text-center py-12">
           <p class="font-serif text-2xl text-stone-700 mb-4">No upcoming dates available right now.</p>
           <p class="text-base text-stone-600 mb-6 max-w-md mx-auto">
-            New ship dates open regularly. Get on the list and I'll email you when the next batch is bookable.
+            New dates open regularly. Get on the list and I'll email you when the next batch is bookable.
           </p>
           <button type="button" data-inquire="portraits" class="inline-block px-5 py-3 border border-stone-900 text-stone-900 rounded-md text-sm font-medium hover:bg-stone-900 hover:text-stone-50 transition cursor-pointer bg-transparent">
             Get notified →
@@ -409,7 +409,7 @@ const faqs = [
         Slots fill up. If you've been thinking about it,<br class="hidden md:block"/> this is your sign.
       </h2>
       <a href="#pick-your-date" class="inline-block px-6 py-3.5 bg-stone-900 text-stone-50 rounded-md text-sm font-medium hover:bg-stone-800 transition">
-        Pick a ship date →
+        Pick a date →
       </a>
     </div>
   </section>
