@@ -129,16 +129,19 @@ const faqs = [
          footage reads as texture, not the focal point. Poster is the video's
          first Cloudinary frame, so nothing 404s. -->
     <video
-      src="https://res.cloudinary.com/dztnasb08/video/upload/q_auto/f_auto/v1780536200/Untitled_design_3_eaeoeg.mp4"
+      id="hero-video"
       poster="https://res.cloudinary.com/dztnasb08/video/upload/q_auto/f_auto/so_0/v1780536200/Untitled_design_3_eaeoeg.jpg"
       class="absolute inset-0 w-full h-full object-cover opacity-80"
       autoplay
       loop
       muted
       playsinline
-      preload="metadata"
+      webkit-playsinline
+      preload="auto"
       aria-hidden="true"
-    ></video>
+    >
+      <source src="https://res.cloudinary.com/dztnasb08/video/upload/q_auto/f_auto/v1780536200/Untitled_design_3_eaeoeg.mp4" type="video/mp4" />
+    </video>
 
     <div class="absolute inset-0 bg-gradient-to-r from-stone-900/85 via-stone-900/55 to-stone-900/30"></div>
     <div class="absolute inset-0 bg-gradient-to-t from-stone-900/75 via-transparent to-stone-900/20"></div>
@@ -546,3 +549,26 @@ const faqs = [
     .portrait-track { animation: none; }
   }
 </style>
+
+<script is:inline>
+  // Nudge the hero reel to autoplay on mobile (iOS Safari blocks autoplay
+  // unless muted + playsinline, and refuses entirely in Low Power Mode). We
+  // force muted, attempt play, and retry on the first user gesture.
+  (function () {
+    var v = document.getElementById('hero-video')
+    if (!v) return
+    v.muted = true
+    v.setAttribute('muted', '')
+    function tryPlay() {
+      var p = v.play()
+      if (p && p.catch) p.catch(function () {})
+    }
+    tryPlay()
+    var events = ['touchstart', 'pointerdown', 'scroll']
+    function kick() {
+      tryPlay()
+      events.forEach(function (ev) { window.removeEventListener(ev, kick) })
+    }
+    events.forEach(function (ev) { window.addEventListener(ev, kick, { passive: true }) })
+  })()
+</script>
