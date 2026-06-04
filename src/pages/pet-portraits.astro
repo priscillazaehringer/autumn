@@ -10,12 +10,20 @@ const slots = await sanityClient.fetch(
     _id,
     shipDate,
     status,
-    checkoutUrl
+    checkoutUrl,
+    price,
+    isLaunch
   }`,
   { today: todayISO }
 )
 
-// Format each slot for display
+// Standard price; launch slots come in cheaper and are local-delivery only.
+const REGULAR_PRICE = 147
+
+// Format each slot for display.
+// In the Studio, add two fields to portraitSlot: `price` (number) and
+// `isLaunch` (boolean). Launch slots are the $47 Cedar Rapids hand-delivery
+// deal. If the fields are absent, slots fall back to the regular price.
 const slotsForDisplay = slots.map((s) => {
   const date = new Date(s.shipDate + 'T12:00:00') // noon avoids timezone day-shift
   const monthShort = date.toLocaleDateString('en-US', { month: 'short' })
@@ -25,8 +33,15 @@ const slotsForDisplay = slots.map((s) => {
     shipLabel: `Ready ${monthShort} ${day}`,
     status: s.status,
     checkoutUrl: s.checkoutUrl || '#',
+    isLaunch: s.isLaunch === true,
+    price: typeof s.price === 'number' ? s.price : REGULAR_PRICE,
   }
 })
+
+// Launch-offer summary used by the hero badge + booking note.
+const launchSlots = slotsForDisplay.filter((s) => s.isLaunch)
+const hasLaunchSlots = launchSlots.some((s) => s.status !== 'booked')
+const launchPrice = launchSlots.length ? Math.min(...launchSlots.map((s) => s.price)) : null
 
 // Pull published testimonials, curated order first.
 // Add a "testimonial" type in the Sanity Studio with: quote, name, petName, status, order.
@@ -83,7 +98,7 @@ const portraitsForDisplay = portraitProjects.map((p) => ({
 
 const steps = [
   { num: '01', text: 'Pick a date below' },
-  { num: '02', text: 'Check out and pay $147' },
+  { num: '02', text: 'Check out and pay' },
   { num: '03', text: "I'll email you for your pet's photos and story" },
   { num: '04', text: 'I paint your pet.' },
   { num: '05', text: "Your portrait's ready on the date you picked" },
@@ -128,9 +143,15 @@ const faqs = [
           Hand-painted pet portraits.
         </h1>
         <p class="hero-lede mb-8 text-stone-700">
-          For the pet you love. $147 · Oil on canvas.
+          For the pet you love. Hand-painted in oil on canvas.
         </p>
-        <a href="#pick-your-date" class="inline-block px-6 py-3.5 bg-stone-900 text-stone-50 rounded-md text-sm font-medium hover:bg-stone-800 transition">
+        {hasLaunchSlots && (
+          <p class="inline-flex items-center gap-2 bg-gold-100 text-gold-800 rounded-full pl-3 pr-3.5 py-1.5 text-xs font-semibold uppercase tracking-wider mb-8">
+            <span class="inline-block w-1.5 h-1.5 rounded-full bg-gold-600"></span>
+            Launch offer — first 7 portraits ${launchPrice}, Cedar Rapids area
+          </p>
+        )}
+        <a href="#pick-your-date" class="block sm:inline-block px-6 py-3.5 bg-stone-900 text-stone-50 rounded-md text-sm font-medium hover:bg-stone-800 transition text-center">
           Pick a date →
         </a>
       </div>
@@ -306,28 +327,51 @@ const faqs = [
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-10">
             {slotsForDisplay.map((slot) => {
               const isBooked = slot.status === 'booked'
+              const isLaunch = slot.isLaunch
               return (
-                <div class={`rounded-lg p-6 transition ${isBooked ? 'bg-stone-100 border border-stone-200' : 'bg-stone-50 border border-stone-200 hover:border-stone-900'}`}>
-                  <p class={`text-xs uppercase tracking-wider mb-3 font-medium ${isBooked ? 'text-stone-400' : 'text-gold-700'}`}>
-                    {isBooked ? 'Booked' : 'Available'}
-                  </p>
-                  <p class={`font-serif text-xl mb-6 leading-tight ${isBooked ? 'text-stone-400' : 'text-stone-900'}`}>
+                <div class={`rounded-lg p-6 transition ${isBooked ? 'bg-stone-100 border border-stone-200' : isLaunch ? 'bg-stone-50 border border-gold-300 hover:border-gold-500' : 'bg-stone-50 border border-stone-200 hover:border-stone-900'}`}>
+                  <div class="flex items-center justify-between mb-3">
+                    <p class={`text-xs uppercase tracking-wider font-medium ${isBooked ? 'text-stone-400' : 'text-gold-700'}`}>
+                      {isBooked ? 'Booked' : 'Available'}
+                    </p>
+                    {isLaunch && !isBooked && (
+                      <span class="text-[10px] uppercase tracking-wider font-semibold text-gold-800 bg-gold-100 rounded-full px-2 py-0.5">Launch</span>
+                    )}
+                  </div>
+                  <p class={`font-serif text-xl leading-tight ${isBooked ? 'text-stone-400' : 'text-stone-900'}`}>
                     {slot.shipLabel}
                   </p>
+                  <p class={`mt-2 ${isBooked ? 'text-stone-400' : 'text-stone-900'}`}>
+                    {isLaunch ? (
+                      <>
+                        <span class="line-through text-stone-400 text-sm mr-1.5">${REGULAR_PRICE}</span>
+                        <span class="font-medium">${slot.price}</span>
+                      </>
+                    ) : (
+                      <span class="font-medium">${slot.price}</span>
+                    )}
+                  </p>
+                  {isLaunch && !isBooked && (
+                    <p class="text-xs text-stone-500 mt-1 leading-relaxed">Cedar Rapids area · hand-delivered, no shipping</p>
+                  )}
                   {!isBooked ? (
-                    <a href={slot.checkoutUrl} class="inline-block w-full text-center px-4 py-2.5 bg-stone-900 text-stone-50 rounded-md text-sm font-medium hover:bg-stone-800 transition">
+                    <a href={slot.checkoutUrl} class="inline-block w-full text-center px-4 py-2.5 mt-5 bg-stone-900 text-stone-50 rounded-md text-sm font-medium hover:bg-stone-800 transition">
                       Book this date
                     </a>
                   ) : (
-                    <p class="text-xs text-stone-400 text-center py-2.5">Not available</p>
+                    <p class="text-xs text-stone-400 text-center py-2.5 mt-5">Not available</p>
                   )}
                 </div>
               )
             })}
           </div>
 
-          <p class="text-center text-sm text-stone-600">
-            $147 per portrait. Includes local delivery or US shipping.
+          <p class="text-center text-sm text-stone-600 max-w-xl mx-auto leading-relaxed">
+            {hasLaunchSlots ? (
+              <>Launch offer: the first 7 portraits are <span class="text-stone-900 font-medium">${launchPrice}</span> for the Cedar Rapids and surrounding area — hand-delivered, no shipping. After that, ${REGULAR_PRICE} per portrait with local delivery or US shipping.</>
+            ) : (
+              <>${REGULAR_PRICE} per portrait. Includes local delivery or US shipping.</>
+            )}
           </p>
           <p class="text-center text-sm text-stone-500 mt-3 max-w-md mx-auto leading-relaxed">
             Painted just for you. If something feels off when it arrives, tell me within 7 days and I'll make it right.
