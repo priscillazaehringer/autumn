@@ -1,6 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro'
-import { sanityClient } from '../lib/sanity.js'
+import { sanityClient, urlFor } from '../lib/sanity.js'
 
 // Pull upcoming portrait slots, only showing future-dated ones
 const todayISO = new Date().toISOString().split('T')[0]
@@ -55,14 +55,21 @@ const features = [
   },
 ]
 
-const galleryImages = [
-  { src: '/images/portraits/portrait-1.jpg', alt: 'Hand-painted oil portrait of a tabby cat' },
-  { src: '/images/portraits/portrait-2.jpg', alt: 'Hand-painted oil portrait of a golden retriever' },
-  { src: '/images/portraits/portrait-3.jpg', alt: 'Hand-painted oil portrait of a black cat' },
-  { src: '/images/portraits/portrait-4.jpg', alt: 'Hand-painted oil portrait of a small dog' },
-  { src: '/images/portraits/portrait-5.jpg', alt: 'Hand-painted oil portrait of a cat with markings' },
-  { src: '/images/portraits/portrait-6.jpg', alt: 'Hand-painted oil portrait of a brown dog' },
-]
+// Gallery pulls from the work catalog — projects filed under the "portrait"
+// medium (your "Pet portrait" category). One hero image per project, so each
+// tile is a different animal. Add portraits in the Studio to grow this grid.
+const portraitProjects = await sanityClient.fetch(
+  `*[_type == "project" && medium == "portrait" && defined(heroImage)] | order(year desc, _createdAt desc) [0...9] {
+    _id,
+    title,
+    heroImage
+  }`
+)
+
+const galleryImages = portraitProjects.map((p) => ({
+  src: urlFor(p.heroImage).width(800).height(1000).fit('crop').url(),
+  alt: p.title ? `Hand-painted oil portrait — ${p.title}` : 'Hand-painted oil pet portrait',
+}))
 
 const steps = [
   { num: '01', text: 'Pick a ship date below' },
@@ -145,28 +152,30 @@ const faqs = [
   </section>
 
   <!-- GALLERY -->
-  <section class="bg-stone-100 py-20 md:py-28">
-    <div class="max-w-6xl mx-auto px-6">
-      <div class="text-center mb-12 md:mb-16">
-        <p class="text-xs uppercase tracking-[0.2em] text-stone-500 mb-4">Recent portraits</p>
-        <h2 class="font-serif text-3xl md:text-4xl font-normal leading-tight">
-          Some of the animals I've painted.
-        </h2>
+  {galleryImages.length > 0 && (
+    <section class="bg-stone-100 py-20 md:py-28">
+      <div class="max-w-6xl mx-auto px-6">
+        <div class="text-center mb-12 md:mb-16">
+          <p class="text-xs uppercase tracking-[0.2em] text-stone-500 mb-4">Recent portraits</p>
+          <h2 class="font-serif text-3xl md:text-4xl font-normal leading-tight">
+            Some of the animals I've painted.
+          </h2>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+          {galleryImages.map((img) => (
+            <div class="aspect-[4/5] overflow-hidden rounded-lg bg-stone-200">
+              <img
+                src={img.src}
+                alt={img.alt}
+                class="w-full h-full object-cover hover:scale-105 transition duration-700"
+                loading="lazy"
+              />
+            </div>
+          ))}
+        </div>
       </div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-        {galleryImages.map((img) => (
-          <div class="aspect-[4/5] overflow-hidden rounded-lg bg-stone-200">
-            <img
-              src={img.src}
-              alt={img.alt}
-              class="w-full h-full object-cover hover:scale-105 transition duration-700"
-              loading="lazy"
-            />
-          </div>
-        ))}
-      </div>
-    </div>
-  </section>
+    </section>
+  )}
 
   <!-- WHAT YOU GET -->
   <section class="max-w-6xl mx-auto px-6 py-20 md:py-28">
