@@ -6,7 +6,7 @@ import { sanityClient, urlFor } from '../lib/sanity.js'
 const todayISO = new Date().toISOString().split('T')[0]
 
 const slots = await sanityClient.fetch(
-  `*[_type == "portraitSlot" && status != "hidden" && shipDate >= $today] | order(shipDate asc) [0...8] {
+  `*[_type == "portraitSlot" && status != "hidden" && shipDate >= $today] | order(shipDate asc) {
     _id,
     shipDate,
     status,
