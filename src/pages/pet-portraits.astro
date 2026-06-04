@@ -59,7 +59,7 @@ const features = [
 // medium (your "Pet portrait" category). One hero image per project, so each
 // tile is a different animal. Add portraits in the Studio to grow this grid.
 const portraitProjects = await sanityClient.fetch(
-  `*[_type == "project" && medium == "portrait" && defined(heroImage)] | order(year desc, _createdAt desc) [0...9] {
+  `*[_type == "project" && medium == "portrait" && defined(heroImage) && slug.current != "simba"] | order(year desc, _createdAt desc) [0...9] {
     _id,
     title,
     heroImage
@@ -75,7 +75,7 @@ const steps = [
   { num: '01', text: 'Pick a ship date below' },
   { num: '02', text: 'Check out and pay $147' },
   { num: '03', text: "I'll email you for your pet's photos and story" },
-  { num: '04', text: 'I paint your pet during the week before' },
+  { num: '04', text: 'I paint your pet.' },
   { num: '05', text: 'Your portrait ships on the date you picked' },
 ]
 
@@ -185,10 +185,10 @@ const faqs = [
         A real painting, made by hand.
       </h2>
     </div>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 max-w-4xl mx-auto">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 max-w-5xl mx-auto">
       {features.map((f) => (
-        <div class="text-center">
-                    <h3 class="h3-card mb-3">{f.title}</h3>
+        <div class="text-center bg-stone-50 border border-stone-200 rounded-xl p-8 md:p-10">
+          <h3 class="h3-card mb-3">{f.title}</h3>
           <p class="text-sm text-stone-600 leading-relaxed">{f.body}</p>
         </div>
       ))}
@@ -337,11 +337,17 @@ const faqs = [
         <h2 class="font-serif text-3xl md:text-4xl font-normal leading-tight mb-6">
           Hi, I'm Autumn.
         </h2>
+        <!-- Bio adapted from /about, tailored to pet portraits. If you reword
+             one, consider updating the other. Tip: drop your pets' names into
+             the second paragraph to make it even more personal. -->
         <p class="text-base text-stone-700 leading-relaxed mb-4">
-          Placeholder paragraph in Autumn's voice.
+          I started drawing as a kid and never really stopped. These days that means chalk festivals all summer, the occasional mural or window — and, at my kitchen table, pet portraits.
+        </p>
+        <p class="text-base text-stone-700 leading-relaxed mb-4">
+          Pets are where this work gets personal. I paint my own all the time, and chasing the exact tilt of an ear or the look in an eye is the part I love most. It's the difference between a painting of a dog and a painting of <em>your</em> dog.
         </p>
         <p class="text-base text-stone-700 leading-relaxed">
-          Placeholder second paragraph.
+          That's also how I ended up painting pet portraits for Chewy.com — so whoever you send me, they'll be in well-practiced (and very well-loved) company.
         </p>
       </div>
     </div>
