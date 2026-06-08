@@ -4,16 +4,16 @@ import { sanityClient, urlFor } from '../lib/sanity.js'
 
 const features = [
   {
-    title: 'High-quality oil paints',
-    body: 'No prints, no digital tricks. Each portrait is hand-painted with high-quality oil paints on wrapped canvas.',
+    title: 'Oil on canvas',
+    body: 'No prints, no digital tricks. Every portrait is hand-painted in oil on wrapped canvas, one animal at a time.',
   },
   {
     title: 'Painted from your photo',
-    body: "Custom to your pet and all their quirks — different-colored eyes, the exact color of their coat, that one ear that won't sit straight. Whatever makes them them.",
+    body: "Custom to your pet and all their quirks: different-colored eyes, the exact shade of their coat, that one ear that won't sit straight. Whatever makes them them.",
   },
   {
     title: 'Ready to hang',
-    body: 'Wrapped canvas arrives ready to display. No frame needed unless you want one.',
+    body: 'Your canvas arrives ready to display. No frame needed unless you want one.',
   },
 ]
 
@@ -44,29 +44,32 @@ const portraitsForDisplay = portraitProjects.map((p) => ({
 }))
 
 const steps = [
-  { num: '01', text: 'Send an inquiry below' },
-  { num: '02', text: "We'll sort out timing together" },
-  { num: '03', text: "I'll email you for your pet's photos and story" },
-  { num: '04', text: 'I paint your pet.' },
-  { num: '05', text: "Your finished portrait is ready" },
+  { num: '01', text: "Send an inquiry and we'll sort out timing together" },
+  { num: '02', text: "You send your pet's photos and their story" },
+  { num: '03', text: 'I paint your pet' },
+  { num: '04', text: 'Your finished portrait ships, ready to hang' },
 ]
 
 const faqs = [
   {
-    q: 'What kind of photo should I send?',
-    a: "After you book, I'll ask for 3 to 5 photos of your pet. Natural light works best. A mix is helpful: a full-body shot, a close-up of the face, and any photos that capture their personality. Phone photos are fine. I'll let you know if I need more.",
+    q: 'What size is the canvas?',
+    a: 'Each portrait is painted on a 5×7 wrapped canvas, one pet per canvas.',
+  },
+  {
+    q: 'How much does it cost?',
+    a: "$147 per canvas, one pet. I'll confirm everything when we sort out the details.",
   },
   {
     q: 'Can you paint more than one pet?',
-    a: 'Not on this size. The 5x7 canvas keeps each portrait detailed and personal, which means one animal per painting. If you have multiple pets, each one gets its own portrait.',
+    a: 'One animal per canvas keeps every detail sharp. For more than one pet, I paint separate canvases, or we can talk through a custom option.',
   },
   {
-    q: 'What size is the canvas?',
-    a: '5x7 inches on wrapped canvas. The wrapped edges mean it can hang as-is — no frame required, though it looks great in one if that\'s your vibe. About the size of a postcard.',
+    q: 'What kind of photo should I send?',
+    a: "Once we get started, I'll ask for 3 to 5 photos of your pet. Natural light works best. A mix is helpful: a full-body shot, a close-up of the face, and any photos that capture their personality. Phone photos are fine. I'll let you know if I need more.",
   },
   {
     q: 'How long does it take?',
-    a: "About a week. I paint your pet during the week leading up to the date you picked, and your portrait's ready to go — for pickup, delivery, or the mail — by then.",
+    a: "Each portrait takes about a week to paint, and most are done and on their way within two to three weeks of getting your photos. If it's a gift with a deadline, tell me and I'll let you know what's doable.",
   },
   {
     q: "What if I don't love it?",
@@ -74,12 +77,12 @@ const faqs = [
   },
   {
     q: 'How do I get my portrait?',
-    a: "Right now I'm focused on my local area around Cedar Rapids — local pickup or hand-delivery — with US shipping rolling out from there. I'll sort out the best option with you after you book. International shipping isn't available yet, but if you're outside the US, get in touch and we'll see what's possible.",
+    a: "Right now I'm focused on my local area around Cedar Rapids — local pickup or hand-delivery — with US shipping rolling out from there. I'll sort out the best option with you after you reach out. International shipping isn't available yet, but if you're outside the US, get in touch and we'll see what's possible.",
   },
 ]
 ---
 
-<BaseLayout title="Pet portraits — Autumn Z Art" description="Hand-painted oil pet portraits. One animal, one week, one painting at a time.">
+<BaseLayout title="Pet portraits — Autumn Z Art" description="Custom hand-painted oil pet portraits from your photo, on wrapped canvas. $147, ready to hang.">
 
   <!-- HERO -->
   <section class="relative w-full overflow-hidden bg-stone-900">
@@ -107,16 +110,23 @@ const faqs = [
     <div class="relative max-w-6xl mx-auto px-6 py-24 md:py-36 min-h-[70vh] md:min-h-[82vh] flex flex-col justify-end">
       <p class="text-xs uppercase tracking-[0.2em] text-gold-300 font-medium mb-6">Pet portraits</p>
       <h1 class="h1-display mb-6 text-stone-50 max-w-[18ch]">
-        Hand-painted pet portraits.
+        The pet you love, painted by hand.
       </h1>
       <p class="hero-lede mb-8 text-stone-200 max-w-xl">
-        For the pet you love. Hand-painted in oil on canvas.
+        Custom oil portraits from your photo, on wrapped canvas. $147 and ready to hang.
       </p>
       <a href="#inquire" class="inline-block self-start px-6 py-3.5 bg-stone-50 text-stone-900 rounded-md text-sm font-medium hover:bg-stone-200 transition text-center">
-        Submit an inquiry →
+        Start your pet's portrait →
       </a>
     </div>
   </section>
+
+  <!-- TRUST LINE -->
+  <div class="bg-stone-50 border-b border-stone-200 py-4 px-6 text-center">
+    <p class="text-xs uppercase tracking-[0.2em] text-stone-500">
+      Currently painting pet portraits for <span class="text-gold-700 font-medium">Chewy.com</span>
+    </p>
+  </div>
 
   <!-- GALLERY — auto-scrolling carousel, click a portrait to open the lightbox -->
   {portraitsForDisplay.length > 0 && (
@@ -206,10 +216,10 @@ const faqs = [
     <div class="text-center mb-12 md:mb-16">
       <p class="text-xs uppercase tracking-[0.2em] text-stone-500 mb-4">How it works</p>
       <h2 class="font-serif text-3xl md:text-4xl font-normal leading-tight">
-        Five steps from photo to your door.
+        How a portrait comes together.
       </h2>
     </div>
-    <div class="relative grid grid-cols-1 md:grid-cols-5 gap-8 md:gap-0 max-w-5xl mx-auto">
+    <div class="relative grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-0 max-w-5xl mx-auto">
       <!-- Continuous rail behind the circles on mobile (vertical timeline). -->
       <span class="md:hidden absolute left-5 top-5 bottom-5 w-px bg-gold-200 -translate-x-1/2" aria-hidden="true"></span>
       {steps.map((s, i) => (
@@ -233,12 +243,12 @@ const faqs = [
         Let's paint your pet.
       </h2>
       <p class="text-base text-stone-600 max-w-xl mx-auto leading-relaxed mb-10">
-        Tell me a little about your pet and I'll reply within 48 hours to sort out the details. These are all custom pieces, so they do need a little lead time. Questions first? Email me at <a href="mailto:aezaehri@gmail.com" class="text-gold-700 underline underline-offset-4 hover:text-gold-900">aezaehri@gmail.com</a>.
+        Tell me a little about your pet and I'll reply within 48 hours to sort out timing and details. Every portrait is custom, so they take a little lead time. $147 per canvas. Questions first? Email me at <a href="mailto:aezaehri@gmail.com" class="text-gold-700 underline underline-offset-4 hover:text-gold-900">aezaehri@gmail.com</a>.
       </p>
 
       <div class="flex flex-col items-center gap-5">
         <button type="button" data-inquire="portraits" class="inline-block w-full sm:w-auto px-8 py-4 bg-stone-900 text-stone-50 rounded-md text-sm font-medium hover:bg-stone-800 transition cursor-pointer">
-          Submit an inquiry →
+          Start your pet's portrait →
         </button>
         <a href="https://instagram.com/autzart" target="_blank" rel="noopener noreferrer" class="text-sm text-stone-500 underline underline-offset-4 hover:text-stone-900 transition">
           Or DM me on Instagram
@@ -288,29 +298,21 @@ const faqs = [
         </h2>
         <!-- Bio in Autumn's words. -->
         <p class="text-base text-stone-700 leading-relaxed mb-4">
-          I've been drawing for as long as I can remember. These days that means chalk events, murals, and window art, and of course pet portraits.
+          I've been drawing for as long as I can remember. These days that means chalk events, murals, window art, and pet portraits.
         </p>
         <p class="text-base text-stone-700 leading-relaxed mb-4">
           Pets are my favorite thing to paint. I'm always painting my own, and getting the exact tilt of an ear or the look in an eye right is the part I love most. That's what turns it into a portrait of <em>your</em> dog, not just some dog.
         </p>
+        <p class="text-base text-stone-700 leading-relaxed mb-4">
+          Fun fact: at home I've got one dog, one cat, and a bearded dragon.
+        </p>
         <p class="text-base text-stone-700 leading-relaxed">
-          Fun fact: I also do pet portraits for Chewy.com, and at home I've got one dog, one cat, and a bearded dragon.
+          If you've been meaning to get them painted, I'd love to do it.
         </p>
       </div>
     </div>
   </section>
 
-  <!-- FINAL CTA -->
-  <section class="bg-gold-50 py-24 md:py-32">
-    <div class="max-w-2xl mx-auto px-6 text-center">
-      <h2 class="font-serif text-3xl md:text-4xl font-normal leading-snug mb-8">
-        If you've been thinking about it,<br class="hidden md:block"/> this is your sign.
-      </h2>
-      <a href="#inquire" class="inline-block px-6 py-3.5 bg-stone-900 text-stone-50 rounded-md text-sm font-medium hover:bg-stone-800 transition">
-        Submit an inquiry →
-      </a>
-    </div>
-  </section>
 
 </BaseLayout>
 
