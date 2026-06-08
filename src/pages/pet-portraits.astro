@@ -2,48 +2,6 @@
 import BaseLayout from '../layouts/BaseLayout.astro'
 import { sanityClient, urlFor } from '../lib/sanity.js'
 
-// Pull upcoming portrait slots, only showing future-dated ones
-const todayISO = new Date().toISOString().split('T')[0]
-
-const slots = await sanityClient.fetch(
-  `*[_type == "portraitSlot" && status != "hidden" && shipDate >= $today] | order(shipDate asc) {
-    _id,
-    shipDate,
-    status,
-    checkoutUrl
-  }`,
-  { today: todayISO }
-)
-
-// ---- Launch offer ----------------------------------------------------------
-// While LAUNCH_MODE is true, every available date is the local, hand-delivered
-// launch deal at LAUNCH_PRICE (shown struck through against REGULAR_PRICE).
-// When you start shipping nationally at the regular price, flip LAUNCH_MODE to
-// false — the badge, the "Launch" pills, and the discount all switch off, and
-// dates revert to REGULAR_PRICE. Just keep your Stripe links in sync with these.
-const LAUNCH_MODE = true
-const LAUNCH_PRICE = 57
-const REGULAR_PRICE = 147
-
-// Format each slot for display.
-const slotsForDisplay = slots.map((s) => {
-  const date = new Date(s.shipDate + 'T12:00:00') // noon avoids timezone day-shift
-  const monthShort = date.toLocaleDateString('en-US', { month: 'short' })
-  const day = date.getDate()
-  return {
-    id: s._id,
-    shipLabel: `Ready ${monthShort} ${day}`,
-    status: s.status,
-    checkoutUrl: s.checkoutUrl || '#',
-    isLaunch: LAUNCH_MODE,
-    price: LAUNCH_MODE ? LAUNCH_PRICE : REGULAR_PRICE,
-  }
-})
-
-// Launch-offer summary used by the hero badge + booking note.
-const hasLaunchSlots = LAUNCH_MODE && slotsForDisplay.some((s) => s.status !== 'booked')
-const launchPrice = LAUNCH_PRICE
-
 const features = [
   {
     title: 'High-quality oil paints',
@@ -86,11 +44,11 @@ const portraitsForDisplay = portraitProjects.map((p) => ({
 }))
 
 const steps = [
-  { num: '01', text: 'Pick a date below' },
-  { num: '02', text: 'Check out and pay' },
+  { num: '01', text: 'Send an inquiry below' },
+  { num: '02', text: "We'll sort out timing together" },
   { num: '03', text: "I'll email you for your pet's photos and story" },
   { num: '04', text: 'I paint your pet.' },
-  { num: '05', text: "Your portrait's ready on the date you picked" },
+  { num: '05', text: "Your finished portrait is ready" },
 ]
 
 const faqs = [
@@ -121,7 +79,7 @@ const faqs = [
 ]
 ---
 
-<BaseLayout title="Pet portraits — Autumn Z Art" description="Hand-painted oil pet portraits. One animal, one week, one painting at a time. $147.">
+<BaseLayout title="Pet portraits — Autumn Z Art" description="Hand-painted oil pet portraits. One animal, one week, one painting at a time.">
 
   <!-- HERO -->
   <section class="relative w-full overflow-hidden bg-stone-900">
@@ -154,14 +112,8 @@ const faqs = [
       <p class="hero-lede mb-8 text-stone-200 max-w-xl">
         For the pet you love. Hand-painted in oil on canvas.
       </p>
-      {hasLaunchSlots && (
-        <p class="inline-flex items-center gap-2 self-start bg-gold-100 text-gold-900 rounded-full pl-3 pr-3.5 py-1.5 text-xs font-semibold uppercase tracking-wider mb-8">
-          <span class="inline-block w-1.5 h-1.5 rounded-full bg-gold-600"></span>
-          Launch offer — first 7 portraits ${launchPrice}, Cedar Rapids, Iowa area
-        </p>
-      )}
-      <a href="#pick-your-date" class="inline-block self-start px-6 py-3.5 bg-stone-50 text-stone-900 rounded-md text-sm font-medium hover:bg-stone-200 transition text-center">
-        Pick a date →
+      <a href="#inquire" class="inline-block self-start px-6 py-3.5 bg-stone-50 text-stone-900 rounded-md text-sm font-medium hover:bg-stone-200 transition text-center">
+        Submit an inquiry →
       </a>
     </div>
   </section>
@@ -273,82 +225,25 @@ const faqs = [
     </div>
   </section>
 
-  <!-- PICK YOUR DATE -->
-  <section id="pick-your-date" class="bg-gold-50 py-24 md:py-32">
-    <div class="max-w-5xl mx-auto px-6">
-      <div class="text-center mb-12 md:mb-16">
-                <p class="eyebrow-gold mb-4">Booking</p>
-        <h2 class="font-serif text-4xl md:text-5xl font-normal leading-tight mb-4">
-          Pick a date.
-        </h2>
-        <p class="text-base text-stone-600 max-w-xl mx-auto leading-relaxed">
-          Pick the date your portrait arrives. These are all custom pieces, so they do need a little lead time. Need it by a date that isn't listed? Email me at <a href="mailto:aezaehri@gmail.com" class="text-gold-700 underline underline-offset-4 hover:text-gold-900">aezaehri@gmail.com</a> and I'll see what I can do.
-        </p>
+  <!-- INQUIRE -->
+  <section id="inquire" class="bg-gold-50 py-24 md:py-32">
+    <div class="max-w-2xl mx-auto px-6 text-center">
+      <p class="eyebrow-gold mb-4">Get started</p>
+      <h2 class="font-serif text-4xl md:text-5xl font-normal leading-tight mb-4">
+        Let's paint your pet.
+      </h2>
+      <p class="text-base text-stone-600 max-w-xl mx-auto leading-relaxed mb-10">
+        Tell me a little about your pet and I'll reply within 48 hours to sort out the details. These are all custom pieces, so they do need a little lead time. Questions first? Email me at <a href="mailto:aezaehri@gmail.com" class="text-gold-700 underline underline-offset-4 hover:text-gold-900">aezaehri@gmail.com</a>.
+      </p>
+
+      <div class="flex flex-col items-center gap-5">
+        <button type="button" data-inquire="portraits" class="inline-block w-full sm:w-auto px-8 py-4 bg-stone-900 text-stone-50 rounded-md text-sm font-medium hover:bg-stone-800 transition cursor-pointer">
+          Submit an inquiry →
+        </button>
+        <a href="https://instagram.com/autzart" target="_blank" rel="noopener noreferrer" class="text-sm text-stone-500 underline underline-offset-4 hover:text-stone-900 transition">
+          Or DM me on Instagram
+        </a>
       </div>
-
-      {slotsForDisplay.length > 0 ? (
-        <>
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-10">
-            {slotsForDisplay.map((slot) => {
-              const isBooked = slot.status === 'booked'
-              const isLaunch = slot.isLaunch
-              return (
-                <div class={`rounded-lg p-6 transition ${isBooked ? 'bg-stone-100 border border-stone-200' : isLaunch ? 'bg-stone-50 border border-gold-300 hover:border-gold-500' : 'bg-stone-50 border border-stone-200 hover:border-stone-900'}`}>
-                  <div class="flex items-center justify-between mb-3">
-                    <p class={`text-xs uppercase tracking-wider font-medium ${isBooked ? 'text-stone-400' : 'text-gold-700'}`}>
-                      {isBooked ? 'Booked' : 'Available'}
-                    </p>
-                    {isLaunch && !isBooked && (
-                      <span class="text-[10px] uppercase tracking-wider font-semibold text-gold-800 bg-gold-100 rounded-full px-2 py-0.5">Launch</span>
-                    )}
-                  </div>
-                  <p class={`font-serif text-xl leading-tight ${isBooked ? 'text-stone-400' : 'text-stone-900'}`}>
-                    {slot.shipLabel}
-                  </p>
-                  <p class={`mt-2 ${isBooked ? 'text-stone-400' : 'text-stone-900'}`}>
-                    {isLaunch ? (
-                      <>
-                        <span class="line-through text-stone-400 text-sm mr-1.5">${REGULAR_PRICE}</span>
-                        <span class="font-medium">${slot.price}</span>
-                      </>
-                    ) : (
-                      <span class="font-medium">${slot.price}</span>
-                    )}
-                  </p>
-                  {isLaunch && !isBooked && (
-                    <p class="text-xs text-stone-500 mt-1 leading-relaxed">Cedar Rapids, Iowa area · hand-delivered, no shipping</p>
-                  )}
-                  {!isBooked ? (
-                    <a href={slot.checkoutUrl} class="inline-block w-full text-center px-4 py-2.5 mt-5 bg-stone-900 text-stone-50 rounded-md text-sm font-medium hover:bg-stone-800 transition">
-                      Book this date
-                    </a>
-                  ) : (
-                    <p class="text-xs text-stone-400 text-center py-2.5 mt-5">Not available</p>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-
-          <p class="text-center text-sm text-stone-600 max-w-xl mx-auto leading-relaxed">
-            {hasLaunchSlots ? (
-              <>Launch offer: the first 7 portraits are <span class="text-stone-900 font-medium">${launchPrice}</span> for the Cedar Rapids, Iowa and surrounding areas — hand-delivered, no shipping.</>
-            ) : (
-              <>${REGULAR_PRICE} per portrait. Includes local delivery or US shipping.</>
-            )}
-          </p>
-        </>
-      ) : (
-        <div class="text-center py-12">
-          <p class="font-serif text-2xl text-stone-700 mb-4">No upcoming dates available right now.</p>
-          <p class="text-base text-stone-600 mb-6 max-w-md mx-auto">
-            New dates open regularly. Get on the list and I'll email you when the next batch is bookable.
-          </p>
-          <button type="button" data-inquire="portraits" class="inline-block px-5 py-3 border border-stone-900 text-stone-900 rounded-md text-sm font-medium hover:bg-stone-900 hover:text-stone-50 transition cursor-pointer bg-transparent">
-            Get notified →
-          </button>
-        </div>
-      )}
     </div>
   </section>
 
@@ -409,10 +304,10 @@ const faqs = [
   <section class="bg-gold-50 py-24 md:py-32">
     <div class="max-w-2xl mx-auto px-6 text-center">
       <h2 class="font-serif text-3xl md:text-4xl font-normal leading-snug mb-8">
-        Slots fill up. If you've been thinking about it,<br class="hidden md:block"/> this is your sign.
+        If you've been thinking about it,<br class="hidden md:block"/> this is your sign.
       </h2>
-      <a href="#pick-your-date" class="inline-block px-6 py-3.5 bg-stone-900 text-stone-50 rounded-md text-sm font-medium hover:bg-stone-800 transition">
-        Pick a date →
+      <a href="#inquire" class="inline-block px-6 py-3.5 bg-stone-900 text-stone-50 rounded-md text-sm font-medium hover:bg-stone-800 transition">
+        Submit an inquiry →
       </a>
     </div>
   </section>
