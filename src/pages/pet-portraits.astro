@@ -47,7 +47,7 @@ const steps = [
   { num: '01', text: "Send an inquiry and we'll sort out timing together" },
   { num: '02', text: "You send your pet's photos and their story" },
   { num: '03', text: 'I paint your pet' },
-  { num: '04', text: 'Your finished portrait ships, ready to hang' },
+  { num: '04', text: 'Your finished portrait arrives, ready to hang' },
 ]
 
 const faqs = [
@@ -57,7 +57,7 @@ const faqs = [
   },
   {
     q: 'How much does it cost?',
-    a: "$147 per canvas, one pet. I'll confirm everything when we sort out the details.",
+    a: "$67 per canvas, one pet — an introductory price while I'm getting started, so it'll go up before long. Shipping and handling is added on top, though if you're local I can drop it off and skip that.",
   },
   {
     q: 'Can you paint more than one pet?',
@@ -77,12 +77,12 @@ const faqs = [
   },
   {
     q: 'How do I get my portrait?',
-    a: "Right now I'm focused on my local area around Cedar Rapids — local pickup or hand-delivery — with US shipping rolling out from there. I'll sort out the best option with you after you reach out. International shipping isn't available yet, but if you're outside the US, get in touch and we'll see what's possible.",
+    a: "If you're local to the Cedar Rapids area, I can drop it off in person — no shipping needed. Otherwise I'll pack it up and ship it to you, with shipping and handling added then. I'm focused on the US for now, but if you're elsewhere, get in touch and we'll see what's possible.",
   },
 ]
 ---
 
-<BaseLayout title="Pet portraits — Autumn Z Art" description="Custom hand-painted oil pet portraits from your photo, on wrapped canvas. $147, ready to hang.">
+<BaseLayout title="Pet portraits — Autumn Z Art" description="Custom hand-painted oil pet portraits from your photo, on wrapped canvas. Introductory pricing at $67 plus shipping.">
 
   <!-- HERO -->
   <section class="relative w-full overflow-hidden bg-stone-900">
@@ -92,7 +92,7 @@ const faqs = [
     <video
       id="hero-video"
       poster="https://res.cloudinary.com/dztnasb08/video/upload/q_auto/f_auto/so_0/v1780536200/Untitled_design_3_eaeoeg.jpg"
-      class="absolute inset-0 w-full h-full object-cover opacity-80"
+      class="absolute inset-0 w-full h-full object-cover opacity-90"
       autoplay
       loop
       muted
@@ -104,8 +104,8 @@ const faqs = [
       <source src="https://res.cloudinary.com/dztnasb08/video/upload/q_auto/f_auto/v1780536200/Untitled_design_3_eaeoeg.mp4" type="video/mp4" />
     </video>
 
-    <div class="absolute inset-0 bg-gradient-to-r from-stone-900/85 via-stone-900/55 to-stone-900/30"></div>
-    <div class="absolute inset-0 bg-gradient-to-t from-stone-900/75 via-transparent to-stone-900/20"></div>
+    <div class="absolute inset-0 bg-gradient-to-r from-stone-900/80 via-stone-900/40 to-stone-900/10"></div>
+    <div class="absolute inset-0 bg-gradient-to-t from-stone-900/60 via-transparent to-transparent"></div>
 
     <div class="relative max-w-6xl mx-auto px-6 py-24 md:py-36 min-h-[70vh] md:min-h-[82vh] flex flex-col justify-end">
       <p class="text-xs uppercase tracking-[0.2em] text-gold-300 font-medium mb-6">Pet portraits</p>
@@ -113,7 +113,7 @@ const faqs = [
         The pet you love, painted by hand.
       </h1>
       <p class="hero-lede mb-8 text-stone-200 max-w-xl">
-        Custom oil portraits from your photo, on wrapped canvas. $147 and ready to hang.
+        Custom oil portraits from your photo, on wrapped canvas. Introductory pricing — $67 plus shipping.
       </p>
       <a href="#inquire" class="inline-block self-start px-6 py-3.5 bg-stone-50 text-stone-900 rounded-md text-sm font-medium hover:bg-stone-200 transition text-center">
         Start your pet's portrait →
@@ -243,7 +243,7 @@ const faqs = [
         Let's paint your pet.
       </h2>
       <p class="text-base text-stone-600 max-w-xl mx-auto leading-relaxed mb-10">
-        Tell me a little about your pet and I'll reply within 48 hours to sort out timing and details. Every portrait is custom, so they take a little lead time. $147 per canvas. Questions first? Email me at <a href="mailto:aezaehri@gmail.com" class="text-gold-700 underline underline-offset-4 hover:text-gold-900">aezaehri@gmail.com</a>.
+        Tell me a little about your pet and I'll reply within 48 hours to sort out timing and details. Every portrait is custom, so they take a little lead time. Introductory pricing is $67 per canvas plus shipping — it'll go up as I get busier, so now's a good time. Questions first? Email me at <a href="mailto:aezaehri@gmail.com" class="text-gold-700 underline underline-offset-4 hover:text-gold-900">aezaehri@gmail.com</a>.
       </p>
 
       <div class="flex flex-col items-center gap-5">
