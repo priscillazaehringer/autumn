@@ -86,12 +86,10 @@ const faqs = [
 
   <!-- HERO -->
   <section class="relative w-full overflow-hidden bg-stone-900">
-    <!-- Ambient background reel, dimmed under gradients so the lower-res
-         footage reads as texture, not the focal point. Poster is the video's
-         first Cloudinary frame, so nothing 404s. -->
+    <!-- Ambient background reel, dimmed under gradients so the footage reads
+         as texture, not the focal point. Self-hosted from /public/videos. -->
     <video
       id="hero-video"
-      poster="https://res.cloudinary.com/dztnasb08/video/upload/q_auto/f_auto/so_0/v1780536200/Untitled_design_3_eaeoeg.jpg"
       class="absolute inset-0 w-full h-full object-cover opacity-90"
       autoplay
       loop
@@ -101,7 +99,7 @@ const faqs = [
       preload="auto"
       aria-hidden="true"
     >
-      <source src="https://res.cloudinary.com/dztnasb08/video/upload/q_auto/f_auto/v1780536200/Untitled_design_3_eaeoeg.mp4" type="video/mp4" />
+      <source src="/videos/art-painting.mp4" type="video/mp4" />
     </video>
 
     <div class="absolute inset-0 bg-gradient-to-r from-stone-900/80 via-stone-900/40 to-stone-900/10"></div>
